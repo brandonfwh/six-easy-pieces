@@ -50,21 +50,15 @@ button.on{font-weight:bold}
 </head>
 <body>
 <h1>Six Easy Pieces</h1>
-<p class="byline">An interactive companion to Feynman's six core ideas. After R. P. Feynman, R. B. Leighton, and M. Sands.</p>
-<p class="intro">Each piece below is a working simulation, not a picture. Pick one:</p>
+<p class="byline">After Feynman, Leighton, and Sands.</p>
+<p class="intro">Pick a piece:</p>
 <nav id="nav"></nav>
 <hr>
 <main id="stage"></main>
 <hr>
-<p class="foot">Drag the controls and the physics responds. The explanatory text is an original paraphrase of the ideas, not the book's wording.</p>
 
 <script>
 "use strict";
-/* =====================================================================
-   SIX EASY PIECES, INTERACTIVE
-   Each piece is a self-contained module: {meta, render(stage), stop()}.
-   The router mounts one at a time and stops the previous animation loop.
-   ===================================================================== */
 
 const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -122,7 +116,7 @@ function pieceHeader(p){
 const PieceAtoms = {
   color:'var(--c1)', roman:'I', eyebrow:'Piece One',
   title:'Atoms in Motion',
-  lead:'Feynman\u2019s single most valuable sentence: everything is made of atoms, little particles in <span class="em">perpetual motion</span>, pulling on each other from a distance and pushing back when squeezed. Heat is nothing more than how hard they jiggle. Turn up the temperature and watch a solid melt and then boil.',
+  lead:'Heat is just atoms <span class="em">jiggling</span>. Turn up the temperature: solid, liquid, gas.',
   raf:null,
   render(){
     const stage = pieceHeader(this);
@@ -153,7 +147,7 @@ const PieceAtoms = {
     ]));
     stage.appendChild(panel);
 
-    stage.appendChild(el('div',{class:'notebox',html:'<b>What you are seeing.</b> At low temperature the atoms settle into a fixed lattice: a <b>solid</b>, where each atom keeps its neighbors. Warm it and the bonds can no longer hold their places, so atoms slide past one another: a <b>liquid</b>. Hotter still and the jiggling beats the attraction entirely, atoms fly off and hammer the walls: a <b>gas</b>. Pressure is just the drumming of those collisions. As Feynman put it, the same picture explains evaporation, melting, and why steam pushes a piston.'}));
+    stage.appendChild(el('div',{class:'notebox',html:'Cold locks atoms into a lattice; heat melts it, then boils it into a wall-pounding gas. Pressure is those collisions.'}));
 
     // ---- simulation state ----
     let W=0,H=0; const N=90;
@@ -280,18 +274,18 @@ const PieceAtoms = {
 const PieceBasic = {
   color:'var(--c2)', roman:'II', eyebrow:'Piece Two',
   title:'Basic Physics',
-  lead:'The whole game of physics is to <span class="em">guess the fewest rules</span> that reproduce the whole show. Before 1920 it looked like two: gravity and electromagnetism. Then quantum mechanics and the nucleus arrived. Climb down through the scales and meet the forces that hold each level together.',
+  lead:'All of physics is a few rules. Zoom down to the <span class="em">forces</span> holding each scale together.',
   levels:[
     {scale:'1 m', name:'A solid object', force:'Electromagnetism',
-     blurb:'At human scale, everything you touch holds its shape because of electric forces between atoms. Push on a table and the table pushes back. That resistance is electromagnetic.', draw:'object'},
+     blurb:'Electric forces between atoms make solids hold their shape.', draw:'object'},
     {scale:'1 nm', name:'Molecules', force:'Electromagnetism',
-     blurb:'Zoom in a billion times and the smooth surface dissolves into atoms bonded into molecules. The bonds, the jiggling, the chemistry: all of it is the electric force at work.', draw:'molecule'},
+     blurb:'Atoms bond into molecules. The bonds are electric.', draw:'molecule'},
     {scale:'0.1 nm', name:'A single atom', force:'Electric attraction',
-     blurb:'One atom: a tiny dense nucleus with electrons swarming around it. The electrons are held in by electrical attraction to the positive nucleus. Quantum mechanics decides where they are allowed to be.', draw:'atom'},
+     blurb:'Electrons held to the nucleus by electric attraction.', draw:'atom'},
     {scale:'10\u207B\u00B9\u2074 m', name:'The nucleus', force:'The strong force',
-     blurb:'Inside sits the nucleus: protons and neutrons jammed together. Electrically the protons should fly apart. A far stronger short-range force, the nuclear force, glues them in place.', draw:'nucleus'},
+     blurb:'Protons and neutrons glued by the strong nuclear force.', draw:'nucleus'},
     {scale:'10\u207B\u00B9\u2075 m', name:'Quarks', force:'The strong force',
-     blurb:'Go one level deeper and each proton or neutron is three quarks, bound so tightly you can never pull just one out. This is the bottom rung physics has reached so far.', draw:'quark'}
+     blurb:'Three quarks per proton, bound so tight you cannot pull one out.', draw:'quark'}
   ],
   render(){
     const stage=pieceHeader(this);
@@ -389,18 +383,18 @@ const PieceBasic = {
 const PieceSciences = {
   color:'var(--c3)', roman:'III', eyebrow:'Piece Three',
   title:'The Relation of Physics to Other Sciences',
-  lead:'Physics is, in Feynman\u2019s phrase, the most <span class="em">fundamental</span> of the sciences. The others all stand on it. Tap a field to see the thread that ties it back to atoms and forces.',
+  lead:'Every science rests on physics. <span class="em">Tap a field</span> to see how.',
   nodes:[
     {name:'Chemistry', tag:'Atoms, arranged',
-     text:'Chemistry is what happens when atoms are brought close enough to rearrange their partners. The whole subject is the dance of electrons between atoms. In principle, physics sets the rules; chemistry is physics worked out for many atoms at once.'},
+     text:'Atoms rearranging partners: chemistry is physics for many atoms at once.'},
     {name:'Biology', tag:'Chemistry, alive',
-     text:'Living things are made of the same atoms, obeying the same forces. Biology rests on chemistry, which rests on physics. The deepest events in a cell, nerves firing, muscles pulling, are atoms and electric forces doing their ordinary work in an extraordinary arrangement.'},
+     text:'The same atoms and forces, arranged into chemistry that lives.'},
     {name:'Astronomy', tag:'Physics, enlarged',
-     text:'Astronomy is older than physics and helped give it birth. Its great lesson: the stars are made of the same stuff as Earth. The light from a distant star carries the fingerprints of the very atoms we study in a lab here.'},
+     text:'The stars are made of the same atoms we study on Earth.'},
     {name:'Geology', tag:'Forces on a planet',
-     text:'What shapes mountains, drives volcanoes, and drifts continents? Heat flowing from inside the Earth and the slow push of vast forces. To understand the planet you need the physics of heat, pressure, and motion.'},
+     text:'Mountains, volcanoes, drifting continents: heat and force on a planet.'},
     {name:'Psychology', tag:'The hardest frontier',
-     text:'Even thought, Feynman suggests, may one day be traced down to the physics of the brain. We are nowhere close. But there is no point where the chain of atoms is known to stop and something else takes over.'}
+     text:'Even thought may trace down to the physics of the brain. We are far from it.'}
   ],
   render(){
     const stage=pieceHeader(this);
@@ -414,9 +408,8 @@ const PieceSciences = {
     side.appendChild(sTag);side.appendChild(sTitle);side.appendChild(sText);side.appendChild(sClose);
     wrap.appendChild(side);
     panel.appendChild(wrap);
-    panel.appendChild(el('div',{class:'readouts'},[el('div',{class:'ro'},[el('span',{class:'k',text:'How to use'}),el('span',{class:'v',style:'font-size:14px',text:'Tap a glowing node'})])]));
     stage.appendChild(panel);
-    stage.appendChild(el('div',{class:'notebox',html:'<b>One ladder, not five subjects.</b> Feynman\u2019s point is not that physics is better, but that it sits underneath. Chemistry is atoms interacting; biology is chemistry in living form; astronomy showed us the sky is built from earthly atoms. The sciences are layers of the same structure.'}));
+    stage.appendChild(el('div',{class:'notebox',html:'Physics sits underneath the rest: they are layers of the same structure.'}));
 
     let W=0,H=0,t=0,sel=-1,hover=-1;
     const nodes=this.nodes; const pos=nodes.map((_,i)=>({a:i/nodes.length*Math.PI*2,r:0,x:0,y:0}));
@@ -479,7 +472,7 @@ const PieceSciences = {
 const PieceEnergy = {
   color:'var(--c4)', roman:'IV', eyebrow:'Piece Four',
   title:'Conservation of Energy',
-  lead:'Energy is a number you can compute that <span class="em">never changes</span>. It only moves between forms. Feynman tells it as a parable: a child has 28 indestructible blocks, and no matter where they hide, under the rug, in the bath, the count always comes back to 28. Energy is the count. Here it trades between motion and height.',
+  lead:'Energy changes form but the <span class="em">total never changes</span>. Watch motion and height trade off.',
   render(){
     const stage=pieceHeader(this);
     const panel=el('div',{class:'panel'});
@@ -505,7 +498,7 @@ const PieceEnergy = {
       el('div',{class:'ctl',style:'min-width:auto'},[el('label',{text:'Drop the bob'}),el('div',{class:'btnrow'},release)])
     ]));
     stage.appendChild(panel);
-    stage.appendChild(el('div',{class:'notebox',html:'<b>Watch the Total bar.</b> With friction off, kinetic and potential energy trade back and forth but their sum stays pinned. That flat line is the conservation law. Turn friction on and mechanical energy drains into the Heat bar: the energy did not vanish, it scattered into the jiggling of atoms (Piece One). The blocks are still 28, some are just under the rug now.'}));
+    stage.appendChild(el('div',{class:'notebox',html:'Friction off: the Total bar holds flat. Friction on: energy leaks into Heat, never lost.'}));
 
     let W=0,H=0;
     const size=()=>{const m=fitCanvas(canvas,Math.min(460,Math.max(340,canvas.clientWidth*0.5)));W=m.w;H=m.h;};
@@ -598,7 +591,7 @@ const PieceEnergy = {
 const PieceGravity = {
   color:'var(--c5)', roman:'V', eyebrow:'Piece Five',
   title:'The Theory of Gravitation',
-  lead:'Newton\u2019s law is almost insultingly simple: every mass pulls every other, falling off as the <span class="em">square of the distance</span>. From that one rule fall out all of Kepler\u2019s patterns of planetary motion. Set a launch speed and let the same law that drops an apple steer a whole orbit.',
+  lead:'Gravity falls off as <span class="em">distance squared</span>. Set a launch speed: circle, ellipse, or escape.',
   render(){
     const stage=pieceHeader(this);
     const panel=el('div',{class:'panel'});
@@ -622,7 +615,7 @@ const PieceGravity = {
       el('div',{class:'ctl',style:'min-width:auto'},[el('label',{text:'Set the planet going'}),el('div',{class:'btnrow'},[launch,clearBtn])])
     ]));
     stage.appendChild(panel);
-    stage.appendChild(el('div',{class:'notebox',html:'<b>One law, every orbit.</b> Slow launch: a tight ellipse that whips around the star. Just right: a near circle. Too fast: the planet swings by once and escapes forever. Notice the trail crowds together near the star and spreads out far away. The planet covers equal areas in equal times, which is Kepler\u2019s second law appearing for free from Newton\u2019s force.'}));
+    stage.appendChild(el('div',{class:'notebox',html:'The trail bunches where the planet moves fast and spreads where it moves slow: Kepler\u2019s equal-area law.'}));
 
     let W=0,H=0;
     const size=()=>{const m=fitCanvas(canvas,Math.min(520,Math.max(380,canvas.clientWidth*0.62)));W=m.w;H=m.h;};
@@ -696,7 +689,7 @@ const PieceGravity = {
 const PieceQuantum = {
   color:'var(--c6)', roman:'VI', eyebrow:'Piece Six',
   title:'Quantum Behavior',
-  lead:'Here is the one experiment Feynman says holds the <span class="em">whole mystery</span> of quantum mechanics. Send things through two slits at a screen. Bullets make two piles. Water waves make stripes. Electrons arrive as single lumps, yet pile up into stripes anyway, unless you watch which slit they take. Then the stripes vanish.',
+  lead:'Two slits, <span class="em">one mystery</span>. Fire bullets, waves, or electrons, then switch on the detector.',
   render(){
     const stage=pieceHeader(this);
     const panel=el('div',{class:'panel'});
@@ -864,10 +857,10 @@ const PieceQuantum = {
 
     function setModeNote(){
       let msg;
-      if(mode==='bullets') msg='<b>Bullets.</b> Each one goes through exactly one slit. The screen builds two simple piles, one behind each slit. No stripes, no mystery.';
-      else if(mode==='waves') msg='<b>Waves.</b> A wave goes through both slits at once and overlaps with itself, reinforcing here and cancelling there. The result is a set of bright and dark stripes: interference.';
-      else if(mode==='electrons'&&!detector) msg='<b>Electrons, unwatched.</b> They arrive one lump at a time, like bullets, yet over many hits they build the striped pattern of a wave. Each electron somehow goes through both slits.';
-      else msg='<b>Electrons, watched.</b> Put a detector at the slits to catch which one each electron uses, and the stripes collapse back to two piles. Measuring the path destroys the interference. This is the uncertainty principle in action.';
+      if(mode==='bullets') msg='Each goes through one slit. Two piles, no stripes.';
+      else if(mode==='waves') msg='A wave passes through both slits and interferes: stripes.';
+      else if(mode==='electrons'&&!detector) msg='Single lumps that pile into stripes. Each goes through both slits.';
+      else msg='Measure the path and the stripes collapse to two piles.';
       note.innerHTML=msg;
       const labels={bullets:'classical',waves:'interference',electrons:detector?'collapsed':'quantum'};
       roMode.textContent='Pattern: '+labels[mode];
