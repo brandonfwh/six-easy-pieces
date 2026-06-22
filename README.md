@@ -58,11 +58,6 @@ button.on{font-weight:bold}
 
 <script>
 "use strict";
-/* =====================================================================
-   SIX EASY PIECES, INTERACTIVE
-   Each piece is a self-contained module: {meta, render(stage), stop()}.
-   The router mounts one at a time and stops the previous animation loop.
-   ===================================================================== */
 
 const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
