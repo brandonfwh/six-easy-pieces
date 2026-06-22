@@ -46,19 +46,23 @@ button.on{font-weight:bold}
 .foot{font-size:.85em;color:#333;margin-top:1.2em}
 .vis-hidden{position:absolute;left:-9999px}
 .menutoggle,.scrim{display:none}
+.lead,.notebox,.readouts,.ladder-meta,.sidepanel,.sidepanel.show,.controls label{display:none!important}
+.controls{margin-top:.4em}
 </style>
 </head>
 <body>
 <h1>Six Easy Pieces</h1>
-<p class="byline">After Feynman, Leighton, and Sands.</p>
-<p class="intro">Pick a piece:</p>
 <nav id="nav"></nav>
 <hr>
 <main id="stage"></main>
-<hr>
 
 <script>
 "use strict";
+/* =====================================================================
+   SIX EASY PIECES, INTERACTIVE
+   Each piece is a self-contained module: {meta, render(stage), stop()}.
+   The router mounts one at a time and stops the previous animation loop.
+   ===================================================================== */
 
 const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -102,8 +106,6 @@ const Loop = (function(){
 function pieceHeader(p){
   const stage = document.getElementById('stage');
   stage.innerHTML='';
-  stage.appendChild(el('h2',{text:p.roman+'. '+p.title}));
-  stage.appendChild(el('p',{class:'lead',html:p.lead}));
   return stage;
 }
 
@@ -140,7 +142,7 @@ const PieceAtoms = {
     const tempVal = el('span',{class:'val'});
     const slider = el('input',{type:'range',min:'0',max:'100',value:'8'});
     const slabel = el('label',[document.createTextNode('Temperature  '),tempVal]);
-    const reset = el('button',{class:'action',text:'Re-form crystal'});
+    const reset = el('button',{class:'action',text:'Reset'});
     panel.appendChild(el('div',{class:'controls'},[
       el('div',{class:'ctl'},[slabel,slider]),
       el('div',{class:'ctl',style:'min-width:auto'},[el('label',{text:'Reset'}),el('div',{class:'btnrow'},reset)])
@@ -609,7 +611,7 @@ const PieceGravity = {
     const vVal=el('span',{class:'val'});
     const vSlider=el('input',{type:'range',min:'30',max:'150',value:'82'});
     const launch=el('button',{class:'action primary',text:'Launch'});
-    const clearBtn=el('button',{class:'action',text:'Clear trail'});
+    const clearBtn=el('button',{class:'action',text:'Clear'});
     panel.appendChild(el('div',{class:'controls'},[
       el('div',{class:'ctl'},[el('label',[document.createTextNode('Launch speed  '),vVal]),vSlider]),
       el('div',{class:'ctl',style:'min-width:auto'},[el('label',{text:'Set the planet going'}),el('div',{class:'btnrow'},[launch,clearBtn])])
@@ -710,8 +712,8 @@ const PieceQuantum = {
     const modes=[['bullets','Bullets'],['waves','Waves'],['electrons','Electrons']];
     const segBtns={};
     modes.forEach(m=>{const b=el('button',{text:m[1],'aria-pressed':String(m[0]===mode)});b.onclick=()=>setMode(m[0]);segBtns[m[0]]=b;seg.appendChild(b);});
-    const detBtn=el('button',{class:'action',text:'Detector at slits: off'});
-    const clearBtn=el('button',{class:'action',text:'Clear screen'});
+    const detBtn=el('button',{class:'action',text:'Detector: off'});
+    const clearBtn=el('button',{class:'action',text:'Clear'});
     panel.appendChild(el('div',{class:'controls'},[
       el('div',{class:'ctl',style:'min-width:auto'},[el('label',{text:'Fire from the source'}),seg]),
       el('div',{class:'ctl',style:'min-width:auto'},[el('label',{text:'Which-path measurement'}),el('div',{class:'btnrow'},detBtn)]),
@@ -875,7 +877,7 @@ const PieceQuantum = {
     }
     setMode('electrons');
     if(!REDUCED) Loop.start(tick); else staticFill();
-    detBtn.onclick=()=>{ if(mode!=='electrons')return; detector=!detector; detBtn.textContent='Detector at slits: '+(detector?'on':'off'); detBtn.classList.toggle('on',detector); dots.length=0;fliers.length=0; setModeNote(); if(REDUCED) staticFill(); };
+    detBtn.onclick=()=>{ if(mode!=='electrons')return; detector=!detector; detBtn.textContent='Detector: '+(detector?'on':'off'); detBtn.classList.toggle('on',detector); dots.length=0;fliers.length=0; setModeNote(); if(REDUCED) staticFill(); };
     clearBtn.onclick=()=>{ dots.length=0; fliers.length=0; if(REDUCED) staticFill(); };
   },
   stop(){ Loop.stop(); if(this._onR) window.removeEventListener('resize',this._onR); }
