@@ -21,10 +21,9 @@ input[type=range] { vertical-align: middle; }
 <body>
 
 <h1>Six Easy Pieces</h1>
-<p class="note">A few simple physics demos based on the book by Richard Feynman.</p>
 
 <h2>1. Atoms in Motion</h2>
-<p>Atoms pull on each other and jiggle. Cold makes a solid, warm makes a liquid, hot makes a gas.</p>
+<p>Atoms pull on each other and shift around. Cold makes a solid, warm makes a liquid, hot makes a gas.</p>
 <canvas id="atoms" width="400" height="250"></canvas>
 <div class="controls">
   Temperature: <input type="range" id="tempSlider" min="0" max="100" value="8" oninput="setTemp()">
@@ -33,7 +32,7 @@ input[type=range] { vertical-align: middle; }
 <div class="readout" id="atomState">State: solid</div>
 
 <h2>2. Basic Physics</h2>
-<p>Zoom in to see what matter is made of, and what force holds each level together.</p>
+<p>Zoom in to see what matter is made of and what force holds each level together.</p>
 <canvas id="basic" width="400" height="250"></canvas>
 <div class="controls">
   <button onclick="zoomOut()">Zoom out</button>
@@ -72,7 +71,7 @@ input[type=range] { vertical-align: middle; }
 <div class="readout" id="orbitInfo">Orbit: circular</div>
 
 <h2>6. Quantum Behavior</h2>
-<p>Electrons make stripes, bullets make two clumps, and watching which slit removes the stripes.</p>
+<p>Waves spread out and converge, electrons make stripes, and bullets make two clumps, and watching which slit removes the stripes.</p>
 <canvas id="quantum" width="400" height="250"></canvas>
 <div class="controls">
   <button onclick="setMode('electron')">Electrons</button>
