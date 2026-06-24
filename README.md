@@ -46,6 +46,11 @@ button.on{font-weight:bold}
 .foot{font-size:.85em;color:#333;margin-top:1.2em}
 .vis-hidden{position:absolute;left:-9999px}
 .menutoggle,.scrim{display:none}
+.sci-card{display:none;margin:.7em 0 0;border:1px solid #000;padding:11px 13px;align-items:center;gap:14px}
+.sci-card.show{display:flex}
+.sci-card img{width:88px;height:88px;flex:none;border:1px solid #888;display:block}
+.sci-card .nm{font-weight:bold;font-size:1.05em;margin-bottom:3px}
+.sci-card .ds{font-size:.95em;line-height:1.45}
 .lead,.notebox,.readouts,.ladder-meta,.sidepanel,.sidepanel.show,.controls label{display:none!important}
 .controls{margin-top:.4em}
 </style>
@@ -384,7 +389,23 @@ const PieceBasic = {
    ===================================================================== */
 const PieceSciences = {
   color:'var(--c3)', roman:'III', title:'The Relation of Physics to Other Sciences',
-  names:['Chemistry','Biology','Astronomy','Geology','Psychology'],
+  data:[
+    {name:'Chemistry',
+     desc:'Atoms rearranging their partners. Chemistry is physics worked out for many atoms at once.',
+     svg:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#0b0b0b'/><path d='M27 9h10v15l11 24a4 4 0 0 1-3.6 6H19.6A4 4 0 0 1 16 48l11-24z' fill='none' stroke='#4fd38a' stroke-width='2.4'/><path d='M23 39h18l6.5 13.5a2 2 0 0 1-1.8 3H18.3a2 2 0 0 1-1.8-3z' fill='#4fd38a' opacity='.45'/><circle cx='29' cy='46' r='2.2' fill='#d6ffe9'/><circle cx='37' cy='50' r='1.6' fill='#d6ffe9'/><line x1='25' y1='9' x2='39' y2='9' stroke='#4fd38a' stroke-width='2.4'/></svg>"},
+    {name:'Biology',
+     desc:'Life is the same atoms and forces, built up through chemistry that lives and reproduces.',
+     svg:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#0b0b0b'/><g stroke='#4fd38a' stroke-width='2.4' fill='none'><path d='M24 8c0 12 16 12 16 24s-16 12-16 24'/><path d='M40 8c0 12-16 12-16 24s16 12 16 24'/></g><g stroke='#d6ffe9' stroke-width='1.8'><line x1='26' y1='16' x2='38' y2='16'/><line x1='29' y1='24' x2='35' y2='24'/><line x1='29' y1='40' x2='35' y2='40'/><line x1='26' y1='48' x2='38' y2='48'/></g></svg>"},
+    {name:'Astronomy',
+     desc:'The stars are made of the same atoms we find on Earth, and they shine by nuclear fusion.',
+     svg:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#0b0b0b'/><circle cx='30' cy='34' r='13' fill='#4fd38a'/><ellipse cx='30' cy='34' rx='22' ry='7' fill='none' stroke='#d6ffe9' stroke-width='2'/><circle cx='50' cy='13' r='1.6' fill='#fff'/><circle cx='14' cy='15' r='1.4' fill='#fff'/><circle cx='49' cy='50' r='1.4' fill='#fff'/><circle cx='10' cy='40' r='1.2' fill='#fff'/></svg>"},
+    {name:'Geology',
+     desc:'Mountains, volcanoes, and drifting continents are heat and force shaping a planet.',
+     svg:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#0b0b0b'/><path d='M4 50 22 24 33 38 41 28 60 50Z' fill='#4fd38a'/><path d='M22 24l5 7-4 6-6-8z' fill='#d6ffe9' opacity='.6'/><rect x='4' y='50' width='56' height='8' fill='#4fd38a' opacity='.4'/></svg>"},
+    {name:'Psychology',
+     desc:'Even thought may trace down to the physics of the brain, though we are far from showing it.',
+     svg:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#0b0b0b'/><path d='M40 14c7 0 11 6 9 12 4 3 3 10-2 12 1 6-5 11-11 9-5 3-12-1-12-7-6-1-8-9-3-13-3-7 4-13 10-11 1-2 4-3 2-3z' fill='none' stroke='#4fd38a' stroke-width='2.4'/><path d='M30 16v34M30 26c-4 0-6 3-6 5M30 36c4 0 6 3 6 5' stroke='#d6ffe9' stroke-width='1.6' fill='none'/></svg>"}
+  ],
   render(){
     const stage=pieceHeader(this);
     const panel=el('div',{class:'panel'});
@@ -392,47 +413,68 @@ const PieceSciences = {
     const canvas=el('canvas',{class:'sim-canvas'});
     wrap.appendChild(canvas); panel.appendChild(wrap); stage.appendChild(panel);
 
-    const names=this.names;
-    let W=0,H=0;
+    // detail card (text + small image)
+    const cImg=el('img',{alt:''});
+    const cName=el('div',{class:'nm'});
+    const cDesc=el('div',{class:'ds'});
+    const card=el('div',{class:'sci-card'},[cImg, el('div',{},[cName,cDesc])]);
+    stage.appendChild(card);
+
+    const data=this.data, names=data.map(d=>d.name);
+    let W=0,H=0,t=0,sel=-1;
     const pos=names.map(()=>({x:0,y:0}));
-    const lit=names.map(()=>false);
-    const size=()=>{const m=fitCanvas(canvas,Math.min(460,Math.max(330,canvas.clientWidth*0.6)));W=m.w;H=m.h;layout();draw();};
     function layout(){
       const cx=W/2,cy=H/2,R=Math.min(W,H)*0.34;
-      // start at top, go clockwise
       names.forEach((_,i)=>{const a=-Math.PI/2 + i/names.length*Math.PI*2;
         pos[i].x=cx+Math.cos(a)*R; pos[i].y=cy+Math.sin(a)*R*0.86;});
     }
+    const size=()=>{const m=fitCanvas(canvas,Math.min(440,Math.max(320,canvas.clientWidth*0.58)));W=m.w;H=m.h;layout();draw();};
+
     function draw(){
       const ctx=canvas.getContext('2d');ctx.clearRect(0,0,W,H);
       const cx=W/2,cy=H/2;
-      // spokes
       names.forEach((_,i)=>{
-        ctx.strokeStyle=lit[i]?'#4fd38a':'rgba(79,211,138,.22)';
-        ctx.lineWidth=lit[i]?3:1.2;
+        const on=(i===sel);
+        ctx.strokeStyle=on?'#4fd38a':'rgba(79,211,138,.22)';
+        ctx.lineWidth=on?3:1.2;
         ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(pos[i].x,pos[i].y);ctx.stroke();
+        if(on && !REDUCED){
+          for(let k=0;k<2;k++){const tt=((t/55)+k*0.5)%1;
+            const mx=lerp(cx,pos[i].x,tt),my=lerp(cy,pos[i].y,tt);
+            ctx.beginPath();ctx.arc(mx,my,4,0,7);ctx.fillStyle='#d6ffe9';ctx.fill();}
+        }
       });
-      // hub
+      names.forEach((nm,i)=>{
+        const on=(i===sel);
+        if(on){const pulse=REDUCED?0:Math.sin(t*0.12)*3;
+          ctx.beginPath();ctx.arc(pos[i].x,pos[i].y,40+pulse,0,7);ctx.fillStyle='rgba(79,211,138,.18)';ctx.fill();}
+        ctx.beginPath();ctx.arc(pos[i].x,pos[i].y,26,0,7);
+        ctx.fillStyle=on?'#4fd38a':'#0b0b0b';ctx.fill();
+        ctx.lineWidth=2;ctx.strokeStyle='#4fd38a';ctx.stroke();
+        ctx.fillStyle=on?'#06351f':'#d6f5e4';ctx.font='13px Georgia,serif';
+        ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(nm,pos[i].x,pos[i].y);
+      });
       ctx.beginPath();ctx.arc(cx,cy,32,0,7);ctx.fillStyle='#4fd38a';ctx.fill();
       ctx.fillStyle='#06351f';ctx.font='bold 14px Georgia,serif';ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.fillText('PHYSICS',cx,cy);
-      // nodes
-      names.forEach((nm,i)=>{
-        ctx.beginPath();ctx.arc(pos[i].x,pos[i].y,26,0,7);
-        ctx.fillStyle=lit[i]?'#4fd38a':'#0b0b0b';ctx.fill();
-        ctx.lineWidth=2;ctx.strokeStyle='#4fd38a';ctx.stroke();
-        ctx.fillStyle=lit[i]?'#06351f':'#d6f5e4';ctx.font='13px Georgia,serif';
-        ctx.fillText(nm,pos[i].x,pos[i].y);
-      });
     }
+    function frame(){ t++; draw(); }
+
     size(); const onR=()=>size(); window.addEventListener('resize',onR); this._onR=onR;
+    if(!REDUCED) Loop.start(frame); else draw();
 
     function evtPos(e){const r=canvas.getBoundingClientRect();
       const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
       const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;return [x,y];}
-    function hit(mx,my){for(let i=0;i<pos.length;i++){if(Math.hypot(pos[i].x-mx,pos[i].y-my)<30)return i;}return -1;}
+    function hit(mx,my){for(let i=0;i<pos.length;i++){if(Math.hypot(pos[i].x-mx,pos[i].y-my)<32)return i;}return -1;}
+    function show(i){
+      sel=i; const d=data[i];
+      cImg.src='data:image/svg+xml;utf8,'+encodeURIComponent(d.svg);
+      cName.textContent=d.name; cDesc.textContent=d.desc;
+      card.classList.add('show'); if(REDUCED)draw();
+    }
     canvas.style.cursor='pointer';
-    canvas.onclick=(e)=>{const[mx,my]=evtPos(e);const i=hit(mx,my);if(i>=0){lit[i]=!lit[i];draw();}};
+    canvas.onclick=(e)=>{const[mx,my]=evtPos(e);const i=hit(mx,my);if(i>=0)show(i);};
   },
   stop(){ Loop.stop(); if(this._onR) window.removeEventListener('resize',this._onR); }
 };
