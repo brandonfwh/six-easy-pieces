@@ -1,929 +1,456 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+<title>Six Easy Pieces</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Six Easy Pieces, Interactive</title>
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{font-family:Georgia,'Times New Roman',serif;color:#000;background:#fff;line-height:1.5;max-width:820px;margin:0 auto;padding:22px 18px 44px}
-h1{font-size:1.9em;font-weight:bold;margin:0 0 2px}
-h2{font-size:1.3em;margin:1.5em 0 .25em}
-.byline{font-style:italic;color:#333;margin:0 0 1.1em}
-.intro{margin:0 0 .35em}
-#nav{line-height:1.95}
-#nav a{color:#0000cc}
-hr{border:0;border-top:1px solid #aaa;margin:1.1em 0}
-.lead{margin:.25em 0 1em}
-.lead .em,.notebox .q{font-style:italic}
-canvas{display:block;background:#0b0b0b;border:1px solid #000;max-width:100%;width:100%;margin:.6em 0}
-.controls{margin:.5em 0 .2em}
-.controls .ctl{display:inline-block;vertical-align:top;margin:0 1.6em .7em 0}
-.controls label{display:block;font-size:.82em;margin-bottom:2px}
-.controls input[type=range]{width:200px;vertical-align:middle}
-.controls .val{font-weight:bold}
-.btnrow{margin-top:2px}
-button{font-family:inherit;font-size:.95em;margin:0 4px 0 0;padding:1px 7px}
-.seg{display:inline-block}
-.seg button[aria-pressed=true]{font-weight:bold;text-decoration:underline}
-button.on{font-weight:bold}
-.readouts{font-family:monospace;font-size:.88em;margin:.3em 0 .2em}
-.readouts .ro{display:inline-block;margin-right:1.6em}
-.readouts .ro .k::after{content:': '}
-.readouts .ro .v{font-weight:bold}
-.readouts .ro .v .u{font-weight:normal;margin-left:2px}
-.statepill{display:inline-block;font-family:monospace;font-size:.88em;font-weight:bold;margin-right:1.6em}
-.notebox{border-left:3px solid #000;padding-left:12px;margin:1em 0;font-size:.95em}
-.ladder-meta{font-family:monospace;font-size:.88em;margin:.3em 0}
-.ladder-meta .scale{font-weight:bold}
-.sim-wrap{position:relative}
-.sidepanel{border:1px solid #000;padding:12px;margin:.6em 0;display:none}
-.sidepanel.show{display:block}
-.sidepanel h3{margin:0 0 4px;font-size:1.1em}
-.sidepanel .tag{font-family:monospace;font-size:.78em;text-transform:uppercase;color:#333;margin-bottom:5px}
-.sidepanel .hint{font-size:.85em;color:#333}
-.foot{font-size:.85em;color:#333;margin-top:1.2em}
-.vis-hidden{position:absolute;left:-9999px}
-.menutoggle,.scrim{display:none}
-.sci-card{display:none;margin:.7em 0 0;border:1px solid #000;padding:11px 13px;align-items:center;gap:14px}
-.sci-card.show{display:flex}
-.sci-card img{width:88px;height:88px;flex:none;border:1px solid #888;display:block}
-.sci-card .nm{font-weight:bold;font-size:1.05em;margin-bottom:3px}
-.sci-card .ds{font-size:.95em;line-height:1.45}
-.lead,.notebox,.readouts,.ladder-meta,.sidepanel,.sidepanel.show,.controls label{display:none!important}
-.controls{margin-top:.4em}
+body { font-family: Arial, Helvetica, sans-serif; margin: 20px; color: #000; background: #fff; }
+h1 { font-size: 22px; margin-bottom: 2px; }
+h2 { font-size: 17px; margin-top: 26px; margin-bottom: 4px; }
+p { margin: 4px 0 8px 0; font-size: 14px; }
+canvas { border: 1px solid #000; background: #fff; max-width: 100%; height: auto; }
+.controls { margin: 6px 0; font-size: 14px; }
+.readout { font-size: 14px; margin: 4px 0; }
+#sciInfo { margin-top: 8px; font-size: 14px; min-height: 90px; }
+#sciInfo img { width: 80px; height: 80px; border: 1px solid #999; vertical-align: middle; margin-right: 8px; }
+.note { color: #555; font-size: 13px; }
+input[type=range] { vertical-align: middle; }
 </style>
 </head>
 <body>
+
 <h1>Six Easy Pieces</h1>
-<nav id="nav"></nav>
-<hr>
-<main id="stage"></main>
+<p class="note">A few simple physics demos based on the book by Richard Feynman.</p>
+
+<h2>1. Atoms in Motion</h2>
+<p>Atoms pull on each other and jiggle. Cold makes a solid, warm makes a liquid, hot makes a gas.</p>
+<canvas id="atoms" width="400" height="250"></canvas>
+<div class="controls">
+  Temperature: <input type="range" id="tempSlider" min="0" max="100" value="8" oninput="setTemp()">
+  <button onclick="resetAtoms()">Reset</button>
+</div>
+<div class="readout" id="atomState">State: solid</div>
+
+<h2>2. Basic Physics</h2>
+<p>Zoom in to see what matter is made of, and what force holds each level together.</p>
+<canvas id="basic" width="400" height="250"></canvas>
+<div class="controls">
+  <button onclick="zoomOut()">Zoom out</button>
+  <button onclick="zoomIn()">Zoom in</button>
+</div>
+<div class="readout" id="basicInfo"></div>
+
+<h2>3. Physics and Other Sciences</h2>
+<p>Click a science to see how it connects to physics.</p>
+<div class="controls">
+  <button onclick="sci('Chemistry')">Chemistry</button>
+  <button onclick="sci('Biology')">Biology</button>
+  <button onclick="sci('Astronomy')">Astronomy</button>
+  <button onclick="sci('Geology')">Geology</button>
+  <button onclick="sci('Psychology')">Psychology</button>
+</div>
+<div id="sciInfo"></div>
+
+<h2>4. Conservation of Energy</h2>
+<p>Energy is not lost, it changes form. Turn on friction and motion energy leaks away as heat.</p>
+<canvas id="energy" width="400" height="250"></canvas>
+<div class="controls">
+  Release angle: <input type="range" id="angleSlider" min="10" max="170" value="120" oninput="setAngle()">
+  <button onclick="releasePendulum()">Release</button>
+  <button onclick="toggleFriction()" id="fricBtn">Friction: off</button>
+</div>
+
+<h2>5. The Theory of Gravitation</h2>
+<p>The Sun's gravity pulls the planet. The speed decides if you get a circle, an ellipse, or an escape.</p>
+<canvas id="gravity" width="400" height="250"></canvas>
+<div class="controls">
+  Launch speed: <input type="range" id="speedSlider" min="40" max="150" value="100" oninput="setSpeed()">
+  <button onclick="launchPlanet()">Launch</button>
+  <button onclick="clearTrail()">Clear trail</button>
+</div>
+<div class="readout" id="orbitInfo">Orbit: circular</div>
+
+<h2>6. Quantum Behavior</h2>
+<p>Electrons make stripes, bullets make two clumps, and watching which slit removes the stripes.</p>
+<canvas id="quantum" width="400" height="250"></canvas>
+<div class="controls">
+  <button onclick="setMode('electron')">Electrons</button>
+  <button onclick="setMode('bullet')">Bullets</button>
+  <button onclick="setMode('wave')">Waves</button>
+  <button onclick="toggleDetector()" id="detBtn">Detector: off</button>
+  <button onclick="clearGun()">Clear</button>
+</div>
+<div class="readout" id="quantumInfo">Mode: electrons</div>
 
 <script>
-"use strict";
-/* =====================================================================
-   SIX EASY PIECES, INTERACTIVE
-   Each piece is a self-contained module: {meta, render(stage), stop()}.
-   The router mounts one at a time and stops the previous animation loop.
-   ===================================================================== */
-
-const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/* ---- small helpers ------------------------------------------------- */
-function el(tag, attrs, kids){
-  const n = document.createElement(tag);
-  if(attrs) for(const k in attrs){
-    if(k==='class') n.className = attrs[k];
-    else if(k==='html') n.innerHTML = attrs[k];
-    else if(k==='text') n.textContent = attrs[k];
-    else if(k.startsWith('on')&&typeof attrs[k]==='function') n.addEventListener(k.slice(2),attrs[k]);
-    else n.setAttribute(k, attrs[k]);
+// ===================== 1. ATOMS (solid / liquid / gas) =====================
+var ax = document.getElementById("atoms").getContext("2d");
+var N = 64;
+var px = [], py = [], vx = [], vy = [];
+var D = 28, CUT = D * 1.5, KREP = 0.9, KATT = 0.05, DAMP = 0.985;
+var temp = 0.08;
+function seedAtoms() {
+  px = []; py = []; vx = []; vy = [];
+  var cols = 8, rows = 8;
+  var startX = (400 - (cols - 1) * D) / 2;
+  var startY = (250 - (rows - 1) * D) / 2;
+  for (var r = 0; r < rows; r++) {
+    for (var c = 0; c < cols; c++) {
+      px.push(startX + c * D + (r % 2 ? D / 2 : 0));
+      py.push(startY + r * D);
+      vx.push(0); vy.push(0);
+    }
   }
-  if(kids) (Array.isArray(kids)?kids:[kids]).forEach(c=>{ if(c!=null) n.appendChild(typeof c==='string'?document.createTextNode(c):c); });
-  return n;
 }
-function fitCanvas(canvas, h){
-  const dpr = Math.min(window.devicePixelRatio||1, 2);
-  const w = canvas.clientWidth || canvas.parentElement.clientWidth;
-  canvas.width = Math.round(w*dpr);
-  canvas.height = Math.round(h*dpr);
-  canvas.style.height = h+'px';
-  const ctx = canvas.getContext('2d');
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  return {ctx, w, h, dpr};
+seedAtoms();
+function drawAtoms() {
+  // forces
+  for (var i = 0; i < N; i++) {
+    for (var j = i + 1; j < N; j++) {
+      var dx = px[j] - px[i], dy = py[j] - py[i];
+      var r2 = dx * dx + dy * dy;
+      if (r2 > CUT * CUT || r2 < 0.01) continue;
+      var r = Math.sqrt(r2), nx = dx / r, ny = dy / r, f;
+      if (r < D) { f = -KREP * (D - r); } else { f = KATT * (r - D); }
+      vx[i] += f * nx; vy[i] += f * ny;
+      vx[j] -= f * nx; vy[j] -= f * ny;
+    }
+  }
+  var kick = temp * temp * 3.2;
+  for (var i = 0; i < N; i++) {
+    vx[i] += (Math.random() * 2 - 1) * kick;
+    vy[i] += (Math.random() * 2 - 1) * kick;
+    vx[i] *= DAMP; vy[i] *= DAMP;
+    px[i] += vx[i]; py[i] += vy[i];
+    if (px[i] < 10) { px[i] = 10; vx[i] = Math.abs(vx[i]); }
+    if (px[i] > 390) { px[i] = 390; vx[i] = -Math.abs(vx[i]); }
+    if (py[i] < 10) { py[i] = 10; vy[i] = Math.abs(vy[i]); }
+    if (py[i] > 240) { py[i] = 240; vy[i] = -Math.abs(vy[i]); }
+  }
+  // draw
+  ax.clearRect(0, 0, 400, 250);
+  ax.strokeStyle = "#bbb"; ax.lineWidth = 1;
+  for (var i = 0; i < N; i++) {
+    for (var j = i + 1; j < N; j++) {
+      var dx = px[j] - px[i], dy = py[j] - py[i];
+      if (dx * dx + dy * dy < (D * 1.25) * (D * 1.25)) {
+        ax.beginPath(); ax.moveTo(px[i], py[i]); ax.lineTo(px[j], py[j]); ax.stroke();
+      }
+    }
+  }
+  ax.fillStyle = "blue";
+  for (var i = 0; i < N; i++) {
+    ax.beginPath(); ax.arc(px[i], py[i], 8, 0, 7); ax.fill();
+  }
 }
-function clamp(v,a,b){return v<a?a:v>b?b:v;}
-function lerp(a,b,t){return a+(b-a)*t;}
+function setTemp() {
+  var v = Number(document.getElementById("tempSlider").value);
+  temp = Math.pow(v / 100, 1.4) + 0.02;
+  var label;
+  if (v < 22) { label = "solid"; } else if (v < 55) { label = "liquid"; } else { label = "gas"; }
+  document.getElementById("atomState").innerHTML = "State: " + label;
+}
+function resetAtoms() {
+  seedAtoms();
+  document.getElementById("tempSlider").value = 8;
+  setTemp();
+}
+setTemp();
+setInterval(drawAtoms, 30);
 
-/* RAF manager so only the active piece animates */
-const Loop = (function(){
-  let id=null, fn=null;
-  function frame(t){ if(fn){ fn(t); id=requestAnimationFrame(frame);} }
-  return {
-    start(f){ this.stop(); fn=f; id=requestAnimationFrame(frame); },
-    stop(){ if(id) cancelAnimationFrame(id); id=null; fn=null; }
-  };
-})();
+// ===================== 2. BASIC PHYSICS (zoom + scale + force) =====================
+var bx = document.getElementById("basic").getContext("2d");
+var level = 0;
+var levels = [
+  { name: "A rock", scale: "about 1 m", force: "electromagnetism" },
+  { name: "Molecules", scale: "about 1 nm", force: "electromagnetism" },
+  { name: "One atom", scale: "about 0.1 nm", force: "the electric force" },
+  { name: "The nucleus", scale: "about 0.00001 nm", force: "the strong force" },
+  { name: "Quarks", scale: "even smaller", force: "the strong force" }
+];
+function drawBasic() {
+  bx.clearRect(0, 0, 400, 250);
+  bx.fillStyle = "black"; bx.font = "16px Arial"; bx.textAlign = "center";
+  bx.fillText(levels[level].name, 200, 28);
+  if (level == 0) {
+    bx.fillStyle = "gray"; bx.fillRect(150, 90, 100, 80);
+  } else if (level == 1) {
+    bx.fillStyle = "blue";
+    for (var i = 0; i < 12; i++) {
+      bx.beginPath(); bx.arc(120 + (i % 4) * 50, 100 + Math.floor(i / 4) * 40, 12, 0, 7); bx.fill();
+    }
+  } else if (level == 2) {
+    bx.fillStyle = "blue"; bx.beginPath(); bx.arc(200, 130, 16, 0, 7); bx.fill();
+    bx.strokeStyle = "gray"; bx.lineWidth = 1; bx.beginPath(); bx.arc(200, 130, 60, 0, 7); bx.stroke();
+    bx.fillStyle = "red"; bx.beginPath(); bx.arc(260, 130, 6, 0, 7); bx.fill();
+  } else if (level == 3) {
+    bx.fillStyle = "red";
+    bx.beginPath(); bx.arc(185, 120, 15, 0, 7); bx.fill();
+    bx.beginPath(); bx.arc(215, 135, 15, 0, 7); bx.fill();
+    bx.fillStyle = "blue";
+    bx.beginPath(); bx.arc(210, 110, 15, 0, 7); bx.fill();
+    bx.beginPath(); bx.arc(185, 145, 15, 0, 7); bx.fill();
+  } else if (level == 4) {
+    bx.fillStyle = "green";
+    bx.beginPath(); bx.arc(200, 110, 11, 0, 7); bx.fill();
+    bx.beginPath(); bx.arc(182, 142, 11, 0, 7); bx.fill();
+    bx.beginPath(); bx.arc(218, 142, 11, 0, 7); bx.fill();
+  }
+  document.getElementById("basicInfo").innerHTML =
+    "Scale: " + levels[level].scale + ". Held together by: " + levels[level].force + ".";
+}
+function zoomIn() { level += 1; if (level >= levels.length) { level = levels.length - 1; } drawBasic(); }
+function zoomOut() { level -= 1; if (level < 0) { level = 0; } drawBasic(); }
+drawBasic();
 
-/* Build the shared header for a piece, returns the stage container */
-function pieceHeader(p){
-  const stage = document.getElementById('stage');
-  stage.innerHTML='';
-  return stage;
+// ===================== 3. OTHER SCIENCES (text + small image) =====================
+var sciSvg = {
+  Chemistry: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#fff'/><path d='M27 9h10v15l11 24a4 4 0 0 1-3.6 6H19.6A4 4 0 0 1 16 48l11-24z' fill='none' stroke='#000' stroke-width='2'/><path d='M23 39h18l6.5 13.5a2 2 0 0 1-1.8 3H18.3a2 2 0 0 1-1.8-3z' fill='#9cf' /><line x1='25' y1='9' x2='39' y2='9' stroke='#000' stroke-width='2'/></svg>",
+  Biology: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#fff'/><g stroke='#000' stroke-width='2' fill='none'><path d='M24 8c0 12 16 12 16 24s-16 12-16 24'/><path d='M40 8c0 12-16 12-16 24s16 12 16 24'/></g><g stroke='#888' stroke-width='1.5'><line x1='26' y1='16' x2='38' y2='16'/><line x1='29' y1='24' x2='35' y2='24'/><line x1='29' y1='40' x2='35' y2='40'/><line x1='26' y1='48' x2='38' y2='48'/></g></svg>",
+  Astronomy: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#fff'/><circle cx='30' cy='34' r='13' fill='#fc6'/><ellipse cx='30' cy='34' rx='22' ry='7' fill='none' stroke='#000' stroke-width='1.5'/><circle cx='50' cy='13' r='1.6' fill='#000'/><circle cx='14' cy='15' r='1.4' fill='#000'/></svg>",
+  Geology: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#fff'/><path d='M4 50 22 24 33 38 41 28 60 50Z' fill='#999'/><path d='M22 24l5 7-4 6-6-8z' fill='#fff'/></svg>",
+  Psychology: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#fff'/><path d='M40 14c7 0 11 6 9 12 4 3 3 10-2 12 1 6-5 11-11 9-5 3-12-1-12-7-6-1-8-9-3-13-3-7 4-13 10-11 1-2 4-3 2-3z' fill='none' stroke='#000' stroke-width='2'/></svg>"
+};
+function sci(name) {
+  var text = "";
+  if (name == "Chemistry") { text = "Atoms joining up to make new substances."; }
+  if (name == "Biology") { text = "Living things are chemistry that is alive."; }
+  if (name == "Astronomy") { text = "Stars are made of the same atoms as we are."; }
+  if (name == "Geology") { text = "Mountains and volcanoes are heat and force on a planet."; }
+  if (name == "Psychology") { text = "Even thinking may come down to physics in the brain."; }
+  var img = "data:image/svg+xml;utf8," + encodeURIComponent(sciSvg[name]);
+  document.getElementById("sciInfo").innerHTML =
+    "<img src='" + img + "' alt=''><b>" + name + ":</b> " + text;
 }
 
-/* =====================================================================
-   PIECE I  -  ATOMS IN MOTION
-   A 2D molecular-dynamics box. A bond model (rest-length springs within
-   a cutoff) plus temperature-scaled thermal kicks gives a real
-   solid -> liquid -> gas transition as you raise the temperature.
-   ===================================================================== */
-const PieceAtoms = {
-  color:'var(--c1)', roman:'I', eyebrow:'Piece One',
-  title:'Atoms in Motion',
-  lead:'Heat is just atoms <span class="em">jiggling</span>. Turn up the temperature: solid, liquid, gas.',
-  raf:null,
-  render(){
-    const stage = pieceHeader(this);
-    const panel = el('div',{class:'panel'});
-    const wrap = el('div',{class:'sim-wrap'});
-    const canvas = el('canvas',{class:'sim-canvas'});
-    wrap.appendChild(canvas);
-    panel.appendChild(wrap);
-
-    // readouts
-    const roTemp = el('span',{class:'v'}); const roState=el('span',{class:'statepill'});
-    const roPress = el('span',{class:'v'});
-    const readouts = el('div',{class:'readouts'},[
-      el('div',{class:'ro'},[el('span',{class:'k',text:'Temperature'}),roTemp]),
-      el('div',{class:'ro'},[el('span',{class:'k',text:'Wall pressure'}),roPress]),
-      roState
-    ]);
-    panel.appendChild(readouts);
-
-    // controls
-    const tempVal = el('span',{class:'val'});
-    const slider = el('input',{type:'range',min:'0',max:'100',value:'8'});
-    const slabel = el('label',[document.createTextNode('Temperature  '),tempVal]);
-    const reset = el('button',{class:'action',text:'Reset'});
-    panel.appendChild(el('div',{class:'controls'},[
-      el('div',{class:'ctl'},[slabel,slider]),
-      el('div',{class:'ctl',style:'min-width:auto'},[el('label',{text:'Reset'}),el('div',{class:'btnrow'},reset)])
-    ]));
-    stage.appendChild(panel);
-
-    stage.appendChild(el('div',{class:'notebox',html:'Cold locks atoms into a lattice; heat melts it, then boils it into a wall-pounding gas. Pressure is those collisions.'}));
-
-    // ---- simulation state ----
-    let W=0,H=0; const N=90;
-    const px=new Float32Array(N),py=new Float32Array(N),vx=new Float32Array(N),vy=new Float32Array(N);
-    const D=26;          // rest spacing
-    const CUT=D*1.6;     // bond cutoff
-    const KREP=0.9, KATT=0.06, DAMP=0.985;
-    let temp=0.08, wallHits=0, pressEMA=0;
-
-    function seedCrystal(){
-      // triangular lattice packed near center
-      let i=0; const cols=10, rows=9, ox=0, oy=0;
-      const startX=()=> (W- (cols-1)*D)/2;
-      for(let r=0;r<rows&&i<N;r++){
-        for(let c=0;c<cols&&i<N;c++){
-          px[i]=startX()+c*D + (r%2?D/2:0) + ox;
-          py[i]=(H-(rows-1)*D*0.92)/2 + r*D*0.92 + oy;
-          vx[i]=0; vy[i]=0; i++;
-        }
-      }
-      for(;i<N;i++){px[i]=W/2;py[i]=H/2;vx[i]=0;vy[i]=0;}
-    }
-    function size(){ const m=fitCanvas(canvas, Math.min(520, Math.max(360, canvas.clientWidth*0.62))); W=m.w; H=m.h; }
-    size(); seedCrystal();
-    const onResize=()=>{ const oldW=W; size(); if(Math.abs(oldW-W)>2){ /* keep positions in bounds */ for(let i=0;i<N;i++){px[i]=clamp(px[i],8,W-8);py[i]=clamp(py[i],8,H-8);} } };
-    window.addEventListener('resize',onResize); this._onResize=onResize;
-
-    function step(){
-      // pairwise bond forces (O(N^2), fine for N=90)
-      for(let i=0;i<N;i++){
-        for(let j=i+1;j<N;j++){
-          let dx=px[j]-px[i], dy=py[j]-py[i];
-          let r2=dx*dx+dy*dy; if(r2>CUT*CUT||r2<0.0001) continue;
-          let r=Math.sqrt(r2), nx=dx/r, ny=dy/r, f;
-          if(r<D){ f=-KREP*(D-r); }          // repel when squeezed
-          else  { f= KATT*(r-D); }            // attract when stretched (within cutoff)
-          const fx=f*nx, fy=f*ny;
-          vx[i]+=fx; vy[i]+=fy; vx[j]-=fx; vy[j]-=fy;
-        }
-      }
-      // thermal kicks scaled by temperature + damping
-      const kick=temp*temp*3.4;
-      for(let i=0;i<N;i++){
-        vx[i]+= (Math.random()*2-1)*kick;
-        vy[i]+= (Math.random()*2-1)*kick;
-        vx[i]*=DAMP; vy[i]*=DAMP;
-        px[i]+=vx[i]; py[i]+=vy[i];
-        // walls
-        if(px[i]<8){px[i]=8;vx[i]=Math.abs(vx[i]);wallHits++;}
-        if(px[i]>W-8){px[i]=W-8;vx[i]=-Math.abs(vx[i]);wallHits++;}
-        if(py[i]<8){py[i]=8;vy[i]=Math.abs(vy[i]);wallHits++;}
-        if(py[i]>H-8){py[i]=H-8;vy[i]=-Math.abs(vy[i]);wallHits++;}
-      }
-    }
-
-    function speedColor(s){
-      // cold blue -> warm coral -> hot yellow
-      const t=clamp(s/4.5,0,1);
-      const r=Math.round(lerp(90,255,t)), g=Math.round(lerp(150,200,t*0.7)), b=Math.round(lerp(255,70,t));
-      return `rgb(${r},${g},${b})`;
-    }
-
-    let frame=0;
-    function draw(){
-      const ctx=canvas.getContext('2d');
-      ctx.clearRect(0,0,W,H);
-      // bonds (only in solid/liquid-ish range, faint)
-      ctx.lineWidth=1.4;
-      for(let i=0;i<N;i++){
-        for(let j=i+1;j<N;j++){
-          let dx=px[j]-px[i],dy=py[j]-py[i],r2=dx*dx+dy*dy;
-          if(r2<(D*1.25)*(D*1.25)){
-            const a=clamp(1-(Math.sqrt(r2)/(D*1.25)),0,1)*0.4;
-            ctx.strokeStyle=`rgba(255,160,120,${a})`;
-            ctx.beginPath();ctx.moveTo(px[i],py[i]);ctx.lineTo(px[j],py[j]);ctx.stroke();
-          }
-        }
-      }
-      for(let i=0;i<N;i++){
-        const s=Math.hypot(vx[i],vy[i]);
-        const col=speedColor(s);
-        ctx.beginPath();ctx.arc(px[i],py[i],8,0,7);
-        ctx.fillStyle=col;ctx.fill();
-      }
-      // readouts (throttled)
-      if((frame++ & 7)===0){
-        let ke=0; for(let i=0;i<N;i++) ke+=vx[i]*vx[i]+vy[i]*vy[i];
-        const tShown=Math.round(ke/N*120);
-        roTemp.innerHTML = tShown+'<span class="u">arb. K</span>';
-        pressEMA = pressEMA*0.9 + wallHits*0.1; wallHits=0;
-        roPress.innerHTML = (pressEMA*4).toFixed(0)+'<span class="u">hits/s</span>';
-        // state classification by temperature setting + mobility
-        let label;
-        if(temp<0.22) label='solid';
-        else if(temp<0.55) label='liquid';
-        else label='gas';
-        roState.textContent='State: '+label;
-      }
-    }
-    function tick(){ step(); draw(); }
-    if(!REDUCED) Loop.start(tick); else { for(let k=0;k<60;k++) step(); draw(); }
-
-    slider.oninput=()=>{
-      temp = Math.pow(slider.value/100,1.4)*1.0 + 0.02;
-      tempVal.textContent = slider.value;
-      slider.style.setProperty('--fill', slider.value+'%');
-      if(REDUCED){ for(let k=0;k<30;k++) step(); draw(); }
-    };
-    slider.oninput(); 
-    reset.onclick=()=>{ seedCrystal(); slider.value=8; slider.oninput(); };
-
-    this.raf=true;
-  },
-  stop(){ Loop.stop(); if(this._onResize) window.removeEventListener('resize',this._onResize); }
-};
-
-/* =====================================================================
-   PIECE II  -  BASIC PHYSICS
-   Physics tries to compress everything into a few fundamental laws and
-   forces. Here you climb down the ladder of scale, from a solid object
-   to the quarks inside a proton, and at each rung you see what force
-   holds that level together.
-   ===================================================================== */
-const PieceBasic = {
-  color:'var(--c2)', roman:'II', eyebrow:'Piece Two',
-  title:'Basic Physics',
-  lead:'All of physics is a few rules. Zoom down to the <span class="em">forces</span> holding each scale together.',
-  levels:[
-    {scale:'1 m', name:'A solid object', force:'Electromagnetism',
-     blurb:'Electric forces between atoms make solids hold their shape.', draw:'object'},
-    {scale:'1 nm', name:'Molecules', force:'Electromagnetism',
-     blurb:'Atoms bond into molecules. The bonds are electric.', draw:'molecule'},
-    {scale:'0.1 nm', name:'A single atom', force:'Electric attraction',
-     blurb:'Electrons held to the nucleus by electric attraction.', draw:'atom'},
-    {scale:'10\u207B\u00B9\u2074 m', name:'The nucleus', force:'The strong force',
-     blurb:'Protons and neutrons glued by the strong nuclear force.', draw:'nucleus'},
-    {scale:'10\u207B\u00B9\u2075 m', name:'Quarks', force:'The strong force',
-     blurb:'Three quarks per proton, bound so tight you cannot pull one out.', draw:'quark'}
-  ],
-  render(){
-    const stage=pieceHeader(this);
-    const panel=el('div',{class:'panel'});
-    const wrap=el('div',{class:'sim-wrap'});
-    const canvas=el('canvas',{class:'sim-canvas'});
-    wrap.appendChild(canvas); panel.appendChild(wrap);
-
-    const scaleEl=el('span',{class:'scale'});
-    const forceEl=el('span',{style:'color:var(--text);font-weight:700'});
-    panel.appendChild(el('div',{class:'ladder-meta'},[
-      el('span',[document.createTextNode('Scale  '),scaleEl]),
-      el('span',[document.createTextNode('Held together by  '),forceEl])
-    ]));
-
-    const zoomIn=el('button',{class:'action primary',text:'Zoom in \u2193'});
-    const zoomOut=el('button',{class:'action',text:'\u2191 Zoom out'});
-    panel.appendChild(el('div',{class:'controls'},[
-      el('div',{class:'ctl',style:'min-width:auto'},[el('label',{text:'Descend the ladder of scale'}),el('div',{class:'btnrow'},[zoomOut,zoomIn])])
-    ]));
-    stage.appendChild(panel);
-    const note=el('div',{class:'notebox'});
-    stage.appendChild(note);
-
-    let W=0,H=0,idx=0,anim=0,target=0;
-    const size=()=>{const m=fitCanvas(canvas,Math.min(480,Math.max(340,canvas.clientWidth*0.56)));W=m.w;H=m.h;};
-    size(); const onR=()=>size(); window.addEventListener('resize',onR); this._onR=onR;
-    const L=this.levels;
-
-    function update(){
-      const lv=L[idx];
-      scaleEl.textContent=lv.scale; forceEl.textContent=lv.force;
-      note.innerHTML='<b>'+lv.name+'.</b> '+lv.blurb;
-      zoomIn.disabled=idx>=L.length-1; zoomOut.disabled=idx<=0;
-      zoomIn.style.opacity=zoomIn.disabled?0.4:1; zoomOut.style.opacity=zoomOut.disabled?0.4:1;
-    }
-    function drawScene(ctx,kind,cx,cy,scale){
-      ctx.save(); ctx.translate(cx,cy); ctx.scale(scale,scale);
-      const C='90,169,255';
-      if(kind==='object'){
-        ctx.fillStyle='rgba(90,169,255,.18)';ctx.strokeStyle='rgba(90,169,255,.8)';ctx.lineWidth=2;
-        ctx.beginPath();ctx.rect(-70,-46,140,92);ctx.fill();ctx.stroke();
-        ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='13px Space Mono';ctx.textAlign='center';
-        ctx.fillText('solid matter',0,5);
-      } else if(kind==='molecule'){
-        const pts=[[-46,-18],[-16,8],[16,-12],[44,14],[-30,30],[20,32]];
-        ctx.strokeStyle='rgba(90,169,255,.5)';ctx.lineWidth=2.5;
-        for(let i=0;i<pts.length-1;i++){ctx.beginPath();ctx.moveTo(pts[i][0],pts[i][1]);ctx.lineTo(pts[i+1][0],pts[i+1][1]);ctx.stroke();}
-        pts.forEach((p,i)=>{ctx.beginPath();ctx.arc(p[0],p[1],i%2?9:13,0,7);ctx.fillStyle=i%2?'#9cc2ff':'#5aa9ff';ctx.fill();});
-      } else if(kind==='atom'){
-        ctx.strokeStyle='rgba(90,169,255,.35)';ctx.lineWidth=1.5;
-        for(let k=0;k<3;k++){ctx.beginPath();ctx.ellipse(0,0,40+k*16,18+k*9,k*1.05,0,7);ctx.stroke();}
-        ctx.beginPath();ctx.arc(0,0,12,0,7);ctx.fillStyle='#5aa9ff';ctx.fill();
-        for(let k=0;k<3;k++){const a=anim*0.04+k*2.1;const rx=40+k*16,ry=18+k*9,rot=k*1.05;
-          const ex=Math.cos(a)*rx,ey=Math.sin(a)*ry;
-          const x=ex*Math.cos(rot)-ey*Math.sin(rot),y=ex*Math.sin(rot)+ey*Math.cos(rot);
-          ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fillStyle='#cfe2ff';ctx.fill();}
-      } else if(kind==='nucleus'){
-        const nuc=[[-14,-8,'#ff6f59'],[10,-12,'#9cc2ff'],[-6,12,'#ff6f59'],[16,8,'#9cc2ff'],[2,-2,'#ff6f59'],[-18,6,'#9cc2ff']];
-        nuc.forEach(p=>{const j=Math.sin(anim*0.06+p[0])*1.5;
-          ctx.beginPath();ctx.arc(p[0]+j,p[1]+j,13,0,7);ctx.fillStyle=p[2];ctx.fill();
-          ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=1;ctx.stroke();});
-      } else if(kind==='quark'){
-        ctx.strokeStyle='rgba(90,169,255,.4)';ctx.lineWidth=2;
-        ctx.beginPath();ctx.arc(0,0,52,0,7);ctx.setLineDash([5,6]);ctx.stroke();ctx.setLineDash([]);
-        const q=[[0,-22,'#ff6f59'],[-20,16,'#4fd38a'],[20,16,'#5aa9ff']];
-        q.forEach(p=>{const j=Math.sin(anim*0.08+p[1])*2;
-          ctx.beginPath();ctx.arc(p[0]+j,p[1],14,0,7);ctx.fillStyle=p[2];ctx.fill();});
-      }
-      ctx.restore();
-    }
-    function frame(){
-      anim++;
-      const ctx=canvas.getContext('2d');ctx.clearRect(0,0,W,H);
-      // transition zoom feel
-      target += (idx-target)*0.12;
-      const fade=1-Math.min(Math.abs(idx-target)*1.4,1);
-      ctx.globalAlpha=clamp(fade,0.2,1);
-      drawScene(ctx,L[idx].draw,W/2,H/2, Math.min(W,H)/260 * lerp(0.78,1,fade));
-      ctx.globalAlpha=1;
-    }
-    if(!REDUCED) Loop.start(frame); else { update(); frame(); }
-    update();
-    zoomIn.onclick=()=>{ if(idx<L.length-1){idx++;update(); if(REDUCED) frame();} };
-    zoomOut.onclick=()=>{ if(idx>0){idx--;update(); if(REDUCED) frame();} };
-  },
-  stop(){ Loop.stop(); if(this._onR) window.removeEventListener('resize',this._onR); }
-};
-
-/* =====================================================================
-   PIECE III  -  THE RELATION OF PHYSICS TO OTHER SCIENCES
-   A small web with physics at the hub. Click any science to read how,
-   in Feynman's telling, it ultimately rests on physics.
-   ===================================================================== */
-const PieceSciences = {
-  color:'var(--c3)', roman:'III', title:'The Relation of Physics to Other Sciences',
-  data:[
-    {name:'Chemistry',
-     desc:'Atoms rearranging their partners. Chemistry is physics worked out for many atoms at once.',
-     svg:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#0b0b0b'/><path d='M27 9h10v15l11 24a4 4 0 0 1-3.6 6H19.6A4 4 0 0 1 16 48l11-24z' fill='none' stroke='#4fd38a' stroke-width='2.4'/><path d='M23 39h18l6.5 13.5a2 2 0 0 1-1.8 3H18.3a2 2 0 0 1-1.8-3z' fill='#4fd38a' opacity='.45'/><circle cx='29' cy='46' r='2.2' fill='#d6ffe9'/><circle cx='37' cy='50' r='1.6' fill='#d6ffe9'/><line x1='25' y1='9' x2='39' y2='9' stroke='#4fd38a' stroke-width='2.4'/></svg>"},
-    {name:'Biology',
-     desc:'Life is the same atoms and forces, built up through chemistry that lives and reproduces.',
-     svg:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#0b0b0b'/><g stroke='#4fd38a' stroke-width='2.4' fill='none'><path d='M24 8c0 12 16 12 16 24s-16 12-16 24'/><path d='M40 8c0 12-16 12-16 24s16 12 16 24'/></g><g stroke='#d6ffe9' stroke-width='1.8'><line x1='26' y1='16' x2='38' y2='16'/><line x1='29' y1='24' x2='35' y2='24'/><line x1='29' y1='40' x2='35' y2='40'/><line x1='26' y1='48' x2='38' y2='48'/></g></svg>"},
-    {name:'Astronomy',
-     desc:'The stars are made of the same atoms we find on Earth, and they shine by nuclear fusion.',
-     svg:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#0b0b0b'/><circle cx='30' cy='34' r='13' fill='#4fd38a'/><ellipse cx='30' cy='34' rx='22' ry='7' fill='none' stroke='#d6ffe9' stroke-width='2'/><circle cx='50' cy='13' r='1.6' fill='#fff'/><circle cx='14' cy='15' r='1.4' fill='#fff'/><circle cx='49' cy='50' r='1.4' fill='#fff'/><circle cx='10' cy='40' r='1.2' fill='#fff'/></svg>"},
-    {name:'Geology',
-     desc:'Mountains, volcanoes, and drifting continents are heat and force shaping a planet.',
-     svg:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#0b0b0b'/><path d='M4 50 22 24 33 38 41 28 60 50Z' fill='#4fd38a'/><path d='M22 24l5 7-4 6-6-8z' fill='#d6ffe9' opacity='.6'/><rect x='4' y='50' width='56' height='8' fill='#4fd38a' opacity='.4'/></svg>"},
-    {name:'Psychology',
-     desc:'Even thought may trace down to the physics of the brain, though we are far from showing it.',
-     svg:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#0b0b0b'/><path d='M40 14c7 0 11 6 9 12 4 3 3 10-2 12 1 6-5 11-11 9-5 3-12-1-12-7-6-1-8-9-3-13-3-7 4-13 10-11 1-2 4-3 2-3z' fill='none' stroke='#4fd38a' stroke-width='2.4'/><path d='M30 16v34M30 26c-4 0-6 3-6 5M30 36c4 0 6 3 6 5' stroke='#d6ffe9' stroke-width='1.6' fill='none'/></svg>"}
-  ],
-  render(){
-    const stage=pieceHeader(this);
-    const panel=el('div',{class:'panel'});
-    const wrap=el('div',{class:'sim-wrap'});
-    const canvas=el('canvas',{class:'sim-canvas'});
-    wrap.appendChild(canvas); panel.appendChild(wrap); stage.appendChild(panel);
-
-    // detail card (text + small image)
-    const cImg=el('img',{alt:''});
-    const cName=el('div',{class:'nm'});
-    const cDesc=el('div',{class:'ds'});
-    const card=el('div',{class:'sci-card'},[cImg, el('div',{},[cName,cDesc])]);
-    stage.appendChild(card);
-
-    const data=this.data, names=data.map(d=>d.name);
-    let W=0,H=0,t=0,sel=-1;
-    const pos=names.map(()=>({x:0,y:0}));
-    function layout(){
-      const cx=W/2,cy=H/2,R=Math.min(W,H)*0.34;
-      names.forEach((_,i)=>{const a=-Math.PI/2 + i/names.length*Math.PI*2;
-        pos[i].x=cx+Math.cos(a)*R; pos[i].y=cy+Math.sin(a)*R*0.86;});
-    }
-    const size=()=>{const m=fitCanvas(canvas,Math.min(440,Math.max(320,canvas.clientWidth*0.58)));W=m.w;H=m.h;layout();draw();};
-
-    function draw(){
-      const ctx=canvas.getContext('2d');ctx.clearRect(0,0,W,H);
-      const cx=W/2,cy=H/2;
-      names.forEach((_,i)=>{
-        const on=(i===sel);
-        ctx.strokeStyle=on?'#4fd38a':'rgba(79,211,138,.22)';
-        ctx.lineWidth=on?3:1.2;
-        ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(pos[i].x,pos[i].y);ctx.stroke();
-        if(on && !REDUCED){
-          for(let k=0;k<2;k++){const tt=((t/55)+k*0.5)%1;
-            const mx=lerp(cx,pos[i].x,tt),my=lerp(cy,pos[i].y,tt);
-            ctx.beginPath();ctx.arc(mx,my,4,0,7);ctx.fillStyle='#d6ffe9';ctx.fill();}
-        }
-      });
-      names.forEach((nm,i)=>{
-        const on=(i===sel);
-        if(on){const pulse=REDUCED?0:Math.sin(t*0.12)*3;
-          ctx.beginPath();ctx.arc(pos[i].x,pos[i].y,40+pulse,0,7);ctx.fillStyle='rgba(79,211,138,.18)';ctx.fill();}
-        ctx.beginPath();ctx.arc(pos[i].x,pos[i].y,26,0,7);
-        ctx.fillStyle=on?'#4fd38a':'#0b0b0b';ctx.fill();
-        ctx.lineWidth=2;ctx.strokeStyle='#4fd38a';ctx.stroke();
-        ctx.fillStyle=on?'#06351f':'#d6f5e4';ctx.font='13px Georgia,serif';
-        ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(nm,pos[i].x,pos[i].y);
-      });
-      ctx.beginPath();ctx.arc(cx,cy,32,0,7);ctx.fillStyle='#4fd38a';ctx.fill();
-      ctx.fillStyle='#06351f';ctx.font='bold 14px Georgia,serif';ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText('PHYSICS',cx,cy);
-    }
-    function frame(){ t++; draw(); }
-
-    size(); const onR=()=>size(); window.addEventListener('resize',onR); this._onR=onR;
-    if(!REDUCED) Loop.start(frame); else draw();
-
-    function evtPos(e){const r=canvas.getBoundingClientRect();
-      const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
-      const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;return [x,y];}
-    function hit(mx,my){for(let i=0;i<pos.length;i++){if(Math.hypot(pos[i].x-mx,pos[i].y-my)<32)return i;}return -1;}
-    function show(i){
-      sel=i; const d=data[i];
-      cImg.src='data:image/svg+xml;utf8,'+encodeURIComponent(d.svg);
-      cName.textContent=d.name; cDesc.textContent=d.desc;
-      card.classList.add('show'); if(REDUCED)draw();
-    }
-    canvas.style.cursor='pointer';
-    canvas.onclick=(e)=>{const[mx,my]=evtPos(e);const i=hit(mx,my);if(i>=0)show(i);};
-  },
-  stop(){ Loop.stop(); if(this._onR) window.removeEventListener('resize',this._onR); }
-};
-
-/* =====================================================================
-   PIECE IV  -  CONSERVATION OF ENERGY
-   A nonlinear pendulum with live energy bars. Total mechanical energy
-   holds flat with no friction; turn friction on and you watch it leak
-   into "heat", the modern version of Feynman's blocks under the rug.
-   ===================================================================== */
-const PieceEnergy = {
-  color:'var(--c4)', roman:'IV', eyebrow:'Piece Four',
-  title:'Conservation of Energy',
-  lead:'Energy changes form but the <span class="em">total never changes</span>. Watch motion and height trade off.',
-  render(){
-    const stage=pieceHeader(this);
-    const panel=el('div',{class:'panel'});
-    const wrap=el('div',{class:'sim-wrap'});
-    const canvas=el('canvas',{class:'sim-canvas'});
-    wrap.appendChild(canvas);panel.appendChild(wrap);
-
-    const roKE=el('span',{class:'v'}),roPE=el('span',{class:'v'}),roTot=el('span',{class:'v'}),roHeat=el('span',{class:'v'});
-    panel.appendChild(el('div',{class:'readouts'},[
-      el('div',{class:'ro'},[el('span',{class:'k',text:'Kinetic'}),roKE]),
-      el('div',{class:'ro'},[el('span',{class:'k',text:'Potential'}),roPE]),
-      el('div',{class:'ro'},[el('span',{class:'k',text:'Heat (lost)'}),roHeat]),
-      el('div',{class:'ro'},[el('span',{class:'k',text:'Total'}),roTot])
-    ]));
-
-    const angVal=el('span',{class:'val'});
-    const angSlider=el('input',{type:'range',min:'10',max:'170',value:'120'});
-    const fricBtn=el('button',{class:'action',text:'Friction: off'});
-    const release=el('button',{class:'action primary',text:'Release'});
-    panel.appendChild(el('div',{class:'controls'},[
-      el('div',{class:'ctl'},[el('label',[document.createTextNode('Release angle  '),angVal]),angSlider]),
-      el('div',{class:'ctl',style:'min-width:auto'},[el('label',{text:'Energy leak'}),el('div',{class:'btnrow'},fricBtn)]),
-      el('div',{class:'ctl',style:'min-width:auto'},[el('label',{text:'Drop the bob'}),el('div',{class:'btnrow'},release)])
-    ]));
-    stage.appendChild(panel);
-    stage.appendChild(el('div',{class:'notebox',html:'Friction off: the Total bar holds flat. Friction on: energy leaks into Heat, never lost.'}));
-
-    let W=0,H=0;
-    const size=()=>{const m=fitCanvas(canvas,Math.min(460,Math.max(340,canvas.clientWidth*0.5)));W=m.w;H=m.h;};
-    size();const onR=()=>size();window.addEventListener('resize',onR);this._onR=onR;
-
-    let theta=Math.PI*120/180, omega=0, friction=false, heat=0;
-    const g=0.0006, L=1.0; // arbitrary units
-    let E0=0;
-    function pivot(){return {x:W/2, y:H*0.16, len:Math.min(W,H)*0.42};}
-    function recompute0(){ E0 = g*L*(1-Math.cos(theta)); } // PE at release, omega=0
-
-    function step(dt){
-      // nonlinear pendulum
-      const a = -g*Math.sin(theta);
-      omega += a*dt;
-      if(friction){ const before=0.5*L*omega*omega; omega*=0.9985; const after=0.5*L*omega*omega; heat+=(before-after); }
-      theta += omega*dt;
-    }
-    function energies(){
-      const ke=0.5*L*omega*omega;
-      const pe=g*L*(1-Math.cos(theta));
-      return {ke,pe,heat,tot:ke+pe+heat};
-    }
-    let frameN=0;
-    function draw(){
-      const ctx=canvas.getContext('2d');ctx.clearRect(0,0,W,H);
-      const p=pivot();
-      const bx=p.x+Math.sin(theta)*p.len, by=p.y+Math.cos(theta)*p.len;
-      // arc guide
-      ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;
-      ctx.beginPath();ctx.arc(p.x,p.y,p.len,Math.PI*0.5-1.9,Math.PI*0.5+1.9);ctx.stroke();
-      // rod
-      ctx.strokeStyle='rgba(255,194,75,.55)';ctx.lineWidth=2.5;
-      ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(bx,by);ctx.stroke();
-      // pivot
-      ctx.fillStyle='#8b94ac';ctx.beginPath();ctx.arc(p.x,p.y,5,0,7);ctx.fill();
-      // bob, color shifts toward red as it heats up if friction
-      ctx.beginPath();ctx.arc(bx,by,17,0,7);
-      ctx.fillStyle='#ffc24b';ctx.fill();
-
-      // energy bars on the right
-      const E=energies();
-      const ref=Math.max(E0,1e-9);
-      const bx0=W-150, bw=26, gap=38, bh=H*0.6, by0=H*0.2;
-      const items=[['KE',E.ke/ref,'#ff6f59'],['PE',E.pe/ref,'#5aa9ff'],['Heat',E.heat/ref,'#b388ff'],['Total',E.tot/ref,'#ffc24b']];
-      items.forEach((it,i)=>{
-        const x=bx0+i*gap;
-        ctx.fillStyle='rgba(255,255,255,.07)';ctx.fillRect(x,by0,bw,bh);
-        const fr=clamp(it[1],0,1.05);
-        ctx.fillStyle=it[2];ctx.fillRect(x,by0+bh*(1-fr),bw,bh*fr);
-        ctx.fillStyle='#8b94ac';ctx.font='10px Space Mono';ctx.textAlign='center';
-        ctx.fillText(it[0],x+bw/2,by0+bh+15);
-      });
-      // total reference line
-      ctx.strokeStyle='rgba(255,194,75,.45)';ctx.setLineDash([4,4]);ctx.lineWidth=1;
-      ctx.beginPath();ctx.moveTo(bx0-8,by0);ctx.lineTo(bx0+3*gap+bw+8,by0);ctx.stroke();ctx.setLineDash([]);
-      ctx.fillStyle='rgba(255,194,75,.7)';ctx.font='9px Space Mono';ctx.textAlign='right';
-      ctx.fillText('release total',bx0-12,by0+3);
-
-      if((frameN++ &7)===0){
-        const pct=(x)=>Math.round(x/ref*100);
-        roKE.innerHTML=pct(E.ke)+'<span class="u">%</span>';
-        roPE.innerHTML=pct(E.pe)+'<span class="u">%</span>';
-        roHeat.innerHTML=pct(E.heat)+'<span class="u">%</span>';
-        roTot.innerHTML=pct(E.tot)+'<span class="u">%</span>';
-      }
-    }
-    function tick(){ for(let s=0;s<6;s++) step(1.0); draw(); }
-    function reset(){ theta=Math.PI*angSlider.value/180; omega=0; heat=0; recompute0(); draw(); }
-    recompute0();
-    if(!REDUCED) Loop.start(tick); else draw();
-
-    angSlider.oninput=()=>{angVal.textContent=angSlider.value+'\u00B0';angSlider.style.setProperty('--fill',((angSlider.value-10)/160*100)+'%');theta=Math.PI*angSlider.value/180;omega=0;heat=0;recompute0();if(REDUCED)draw();};
-    angSlider.oninput();
-    fricBtn.onclick=()=>{friction=!friction;fricBtn.textContent='Friction: '+(friction?'on':'off');fricBtn.classList.toggle('on',friction);};
-    release.onclick=reset;
-    if(REDUCED){ // give reduced-motion users a static "in motion" snapshot
-      for(let k=0;k<140;k++) step(1.0); draw();
-    }
-  },
-  stop(){ Loop.stop(); if(this._onR) window.removeEventListener('resize',this._onR); }
-};
-
-/* =====================================================================
-   PIECE V  -  THE THEORY OF GRAVITATION
-   Newtonian two-body orbit. Set the launch speed and watch circles,
-   ellipses, and escapes. The trail thins where the planet moves slow
-   and bunches where it moves fast: Kepler's equal-area law, visible.
-   ===================================================================== */
-const PieceGravity = {
-  color:'var(--c5)', roman:'V', eyebrow:'Piece Five',
-  title:'The Theory of Gravitation',
-  lead:'Gravity falls off as <span class="em">distance squared</span>. Set a launch speed: circle, ellipse, or escape.',
-  render(){
-    const stage=pieceHeader(this);
-    const panel=el('div',{class:'panel'});
-    const wrap=el('div',{class:'sim-wrap'});
-    const canvas=el('canvas',{class:'sim-canvas'});
-    wrap.appendChild(canvas);panel.appendChild(wrap);
-
-    const roSpeed=el('span',{class:'v'}),roDist=el('span',{class:'v'}),roType=el('span',{class:'statepill'});
-    panel.appendChild(el('div',{class:'readouts'},[
-      el('div',{class:'ro'},[el('span',{class:'k',text:'Orbital speed'}),roSpeed]),
-      el('div',{class:'ro'},[el('span',{class:'k',text:'Distance'}),roDist]),
-      roType
-    ]));
-
-    const vVal=el('span',{class:'val'});
-    const vSlider=el('input',{type:'range',min:'30',max:'150',value:'82'});
-    const launch=el('button',{class:'action primary',text:'Launch'});
-    const clearBtn=el('button',{class:'action',text:'Clear'});
-    panel.appendChild(el('div',{class:'controls'},[
-      el('div',{class:'ctl'},[el('label',[document.createTextNode('Launch speed  '),vVal]),vSlider]),
-      el('div',{class:'ctl',style:'min-width:auto'},[el('label',{text:'Set the planet going'}),el('div',{class:'btnrow'},[launch,clearBtn])])
-    ]));
-    stage.appendChild(panel);
-    stage.appendChild(el('div',{class:'notebox',html:'The trail bunches where the planet moves fast and spreads where it moves slow: Kepler\u2019s equal-area law.'}));
-
-    let W=0,H=0;
-    const size=()=>{const m=fitCanvas(canvas,Math.min(520,Math.max(380,canvas.clientWidth*0.62)));W=m.w;H=m.h;};
-    size();const onR=()=>{const o=W;size();};window.addEventListener('resize',onR);this._onR=onR;
-
-    const GM=46; // gravitational parameter, tuned for the view
-    let px,py,vx,vy,trail=[],launched=false;
-    function star(){return {x:W/2,y:H/2};}
-    function setup(){
-      const s=star(); const r0=Math.min(W,H)*0.32;
-      px=s.x+r0; py=s.y; const sp=vSlider.value/100 * Math.sqrt(GM/r0);
-      vx=0; vy=-sp; trail=[]; launched=true;
-    }
-    function step(dt){
-      const s=star();
-      for(let k=0;k<2;k++){
-        let dx=s.x-px, dy=s.y-py; let r2=dx*dx+dy*dy; let r=Math.sqrt(r2);
-        const soft=Math.max(r,14);
-        const a=GM/(soft*soft);
-        vx+=a*dx/r*dt; vy+=a*dy/r*dt;
-        px+=vx*dt; py+=vy*dt;
-      }
-      trail.push([px,py]); if(trail.length>900) trail.shift();
-    }
-    let frameN=0;
-    function draw(){
-      const ctx=canvas.getContext('2d');ctx.clearRect(0,0,W,H);
-      const s=star();
-      // trail
-      ctx.lineWidth=2;
-      for(let i=1;i<trail.length;i++){
-        const a=i/trail.length;
-        ctx.strokeStyle='rgba(179,136,255,'+(a*0.8)+')';
-        ctx.beginPath();ctx.moveTo(trail[i-1][0],trail[i-1][1]);ctx.lineTo(trail[i][0],trail[i][1]);ctx.stroke();
-      }
-      // star with glow
-      ctx.fillStyle='#e8b54a';ctx.beginPath();ctx.arc(s.x,s.y,13,0,7);ctx.fill();
-      if(launched){
-        ctx.beginPath();ctx.arc(px,py,6,0,7);
-        ctx.fillStyle='#b388ff';ctx.fill();
-      }
-      if((frameN++ &7)===0 && launched){
-        const sp=Math.hypot(vx,vy); const dx=s.x-px,dy=s.y-py;const r=Math.hypot(dx,dy);
-        roSpeed.innerHTML=(sp*30).toFixed(0)+'<span class="u">arb.</span>';
-        roDist.innerHTML=(r/Math.min(W,H)*1000|0)+'<span class="u">arb.</span>';
-        const vEsc=Math.sqrt(2*GM/Math.max(r,14));
-        let label;
-        if(sp>vEsc*0.995) label='escape';
-        else if(Math.abs(vSlider.value-100)<6) label='~circular';
-        else label='ellipse';
-        roType.textContent='Orbit: '+label;
-      }
-    }
-    function tick(){ if(launched) step(1.0); draw(); }
-    setup();
-    if(!REDUCED) Loop.start(tick); else { for(let k=0;k<400;k++) step(1.0); draw(); }
-    vSlider.oninput=()=>{vVal.textContent=(vSlider.value/100).toFixed(2)+'\u00D7';vSlider.style.setProperty('--fill',((vSlider.value-30)/120*100)+'%');};
-    vSlider.oninput();
-    launch.onclick=()=>{ setup(); if(REDUCED){for(let k=0;k<400;k++)step(1.0);draw();} };
-    clearBtn.onclick=()=>{ trail=[]; if(REDUCED)draw(); };
-  },
-  stop(){ Loop.stop(); if(this._onR) window.removeEventListener('resize',this._onR); }
-};
-
-/* =====================================================================
-   PIECE VI  -  QUANTUM BEHAVIOR
-   The double slit, the heart of the chapter. Fire bullets (two bumps),
-   waves (smooth fringes), or electrons (lumps that pile into fringes).
-   Switch on the detector and the electron interference collapses.
-   ===================================================================== */
-const PieceQuantum = {
-  color:'var(--c6)', roman:'VI', eyebrow:'Piece Six',
-  title:'Quantum Behavior',
-  lead:'Two slits, <span class="em">one mystery</span>. Fire bullets, waves, or electrons, then switch on the detector.',
-  render(){
-    const stage=pieceHeader(this);
-    const panel=el('div',{class:'panel'});
-    const wrap=el('div',{class:'sim-wrap'});
-    const canvas=el('canvas',{class:'sim-canvas'});
-    wrap.appendChild(canvas);panel.appendChild(wrap);
-
-    const roCount=el('span',{class:'v'});
-    const roMode=el('span',{class:'statepill'});
-    panel.appendChild(el('div',{class:'readouts'},[
-      el('div',{class:'ro'},[el('span',{class:'k',text:'Detections'}),roCount]),
-      roMode
-    ]));
-
-    // segmented source control
-    let mode='electrons', detector=false;
-    const seg=el('div',{class:'seg'});
-    const modes=[['bullets','Bullets'],['waves','Waves'],['electrons','Electrons']];
-    const segBtns={};
-    modes.forEach(m=>{const b=el('button',{text:m[1],'aria-pressed':String(m[0]===mode)});b.onclick=()=>setMode(m[0]);segBtns[m[0]]=b;seg.appendChild(b);});
-    const detBtn=el('button',{class:'action',text:'Detector: off'});
-    const clearBtn=el('button',{class:'action',text:'Clear'});
-    panel.appendChild(el('div',{class:'controls'},[
-      el('div',{class:'ctl',style:'min-width:auto'},[el('label',{text:'Fire from the source'}),seg]),
-      el('div',{class:'ctl',style:'min-width:auto'},[el('label',{text:'Which-path measurement'}),el('div',{class:'btnrow'},detBtn)]),
-      el('div',{class:'ctl',style:'min-width:auto'},[el('label',{text:'Reset'}),el('div',{class:'btnrow'},clearBtn)])
-    ]));
-    stage.appendChild(panel);
-    const note=el('div',{class:'notebox'});
-    stage.appendChild(note);
-
-    let W=0,H=0;
-    const size=()=>{const m=fitCanvas(canvas,Math.min(500,Math.max(360,canvas.clientWidth*0.6)));W=m.w;H=m.h;};
-    size();const onR=()=>size();window.addEventListener('resize',onR);this._onR=onR;
-
-    // geometry
-    const slitSep=46, slitHalf=11;
-    function geom(){return {sx:W*0.5, screenX:W*0.86, srcX:W*0.1, midY:H/2};}
-    // intensity along screen y (relative to mid). Two-slit pattern with envelope.
-    function intensity(y){
-      const k=0.16, d=slitSep*0.5, a=slitHalf;
-      const beta=k*a*y/120;
-      const env=Math.abs(beta)<1e-4?1:Math.pow(Math.sin(beta)/beta,2);
-      const inter=Math.pow(Math.cos(k*d*y/40),2);
-      return env*inter;
-    }
-    // sample y by rejection against the interference distribution
-    function sampleWaveY(){
-      const span=H*0.42;
-      for(let tries=0;tries<60;tries++){
-        const y=(Math.random()*2-1)*span;
-        if(Math.random()<intensity(y)) return y;
-      }
-      return (Math.random()*2-1)*span*0.3;
-    }
-    function sampleBulletY(){ // two gaussian bumps at the slit projections
-      const which=Math.random()<0.5?-1:1;
-      let g=0;for(let i=0;i<6;i++)g+=Math.random();g=(g/6-0.5);
-      return which*slitSep*1.6 + g*H*0.16;
-    }
-
-    const dots=[]; const MAXD=4000;
-    function addDot(){
-      let y;
-      if(mode==='bullets'||(mode==='electrons'&&detector)) y=sampleBulletY();
-      else y=sampleWaveY();
-      dots.push(y);
-      if(dots.length>MAXD) dots.shift();
-    }
-    // a few flying particles for animation
-    const fliers=[];
-    function spawnFlier(){
-      const g=geom();
-      const targetY = (mode==='bullets'||(mode==='electrons'&&detector))?sampleBulletY():sampleWaveY();
-      fliers.push({x:g.srcX,y:g.midY,t:0,ty:targetY});
-    }
-
-    function drawWaveCurve(ctx,g){
-      // analytic intensity curve for waves mode
-      ctx.strokeStyle='rgba(41,224,208,.85)';ctx.lineWidth=2;ctx.beginPath();
-      const span=H*0.42;
-      for(let yy=-span;yy<=span;yy+=2){
-        const I=intensity(yy);
-        const x=g.screenX+ I*70;
-        const y=g.midY+yy;
-        if(yy===-span)ctx.moveTo(x,y);else ctx.lineTo(x,y);
-      }
-      ctx.stroke();
-      // fill
-      ctx.lineTo(g.screenX,g.midY+span);ctx.lineTo(g.screenX,g.midY-span);ctx.closePath();
-      ctx.fillStyle='rgba(41,224,208,.14)';ctx.fill();
-    }
-    function drawHistogram(ctx,g){
-      const span=H*0.42, bins=90; const arr=new Array(bins).fill(0);
-      dots.forEach(y=>{const b=Math.floor((y+span)/(2*span)*bins);if(b>=0&&b<bins)arr[b]++;});
-      const mx=Math.max(1,...arr);
-      ctx.fillStyle='rgba(41,224,208,.16)';
-      for(let b=0;b<bins;b++){
-        const y=g.midY-span + b*(2*span/bins);
-        const w=arr[b]/mx*70;
-        ctx.fillRect(g.screenX,y,w,(2*span/bins)+0.6);
-      }
-      // recent dots as individual lumps
-      ctx.fillStyle='#9bf6ee';
-      const recent=dots.slice(-700);
-      recent.forEach(y=>{ const jitter=(Math.random()*2-1)*6;
-        ctx.fillRect(g.screenX+2+Math.random()*66, g.midY+y+jitter*0, 1.6,1.6); });
-    }
-
-    let frameN=0, fireAccum=0;
-    function draw(){
-      const ctx=canvas.getContext('2d');ctx.clearRect(0,0,W,H);
-      const g=geom();
-      // source
-      ctx.fillStyle='#2ee6d6';ctx.beginPath();ctx.arc(g.srcX,g.midY,7,0,7);ctx.fill();
-      ctx.fillStyle='rgba(255,255,255,.4)';ctx.font='10px Space Mono';ctx.textAlign='center';
-      ctx.fillText('source',g.srcX,g.midY+26);
-      // barrier with two slits
-      ctx.fillStyle='rgba(255,255,255,.16)';
-      const bx=g.sx, top=g.midY-H*0.42, bot=g.midY+H*0.42;
-      ctx.fillRect(bx-4,top, 8, (g.midY-slitSep-slitHalf)-top);
-      ctx.fillRect(bx-4,g.midY-slitSep+slitHalf, 8, (g.midY+slitSep-slitHalf)-(g.midY-slitSep+slitHalf));
-      ctx.fillRect(bx-4,g.midY+slitSep+slitHalf, 8, bot-(g.midY+slitSep+slitHalf));
-      // detector glow at slits if on
-      if(detector && mode==='electrons'){
-        [-slitSep,slitSep].forEach(o=>{ctx.fillStyle='rgba(255,111,89,.5)';ctx.beginPath();ctx.arc(bx,g.midY+o,9,0,7);ctx.fill();});
-        ctx.fillStyle='rgba(255,111,89,.8)';ctx.font='10px Space Mono';ctx.fillText('watching',bx,top-6);
-      }
-      // screen line
-      ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(g.screenX,top);ctx.lineTo(g.screenX,bot);ctx.stroke();
-
-      if(mode==='waves'){
-        // animated wavefronts + analytic pattern
-        if(!REDUCED){ctx.strokeStyle='rgba(41,224,208,.12)';ctx.lineWidth=1.4;
-          for(let r=( (frameN*1.2)%40);r<g.sx-g.srcX;r+=40){ctx.beginPath();ctx.arc(g.srcX,g.midY,r,-1,1);ctx.stroke();}
-          [-slitSep,slitSep].forEach(o=>{for(let r=((frameN*1.2)%34);r<(g.screenX-g.sx);r+=34){ctx.beginPath();ctx.arc(g.sx,g.midY+o,r,-1.2,1.2);ctx.stroke();}});
-        }
-        drawWaveCurve(ctx,g);
-      } else {
-        drawHistogram(ctx,g);
-        // flying particles
-        for(let i=fliers.length-1;i>=0;i--){
-          const f=fliers[i]; f.t+=0.03;
-          if(f.t>=1){ addDot.__y=f.ty; dots.push(f.ty); if(dots.length>MAXD)dots.shift(); fliers.splice(i,1); continue; }
-          const t=f.t;
-          // path: source -> slit -> screen target
-          let x,y;
-          if(t<0.5){const u=t/0.5;const slitY=g.midY + (f.ty<0?-slitSep:slitSep)*(detector||mode==='bullets'?1:(Math.random()<0?-1:1));
-            x=lerp(g.srcX,g.sx,u);y=lerp(g.midY, g.midY+(f.ty<0?-slitSep:slitSep),u);}
-          else {const u=(t-0.5)/0.5;x=lerp(g.sx,g.screenX,u);y=lerp(g.midY+(f.ty<0?-slitSep:slitSep), g.midY+f.ty,u);}
-          ctx.fillStyle=mode==='bullets'?'#ffd27a':'#9bf6ee';
-          ctx.beginPath();ctx.arc(x,y,mode==='bullets'?4:3,0,7);ctx.fill();
-        }
-      }
-
-      // fire new particles over time
-      if(!REDUCED){
-        fireAccum+=1;
-        if(mode!=='waves'){ if(fireAccum>=3){fireAccum=0; spawnFlier();} }
-      }
-      frameN++;
-      if((frameN&7)===0){ roCount.innerHTML = (mode==='waves'?'\u2014':dots.length); }
-    }
-    function tick(){ draw(); }
-
-    function setModeNote(){
-      let msg;
-      if(mode==='bullets') msg='Each goes through one slit. Two piles, no stripes.';
-      else if(mode==='waves') msg='A wave passes through both slits and interferes: stripes.';
-      else if(mode==='electrons'&&!detector) msg='Single lumps that pile into stripes. Each goes through both slits.';
-      else msg='Measure the path and the stripes collapse to two piles.';
-      note.innerHTML=msg;
-      const labels={bullets:'classical',waves:'interference',electrons:detector?'collapsed':'quantum'};
-      roMode.textContent='Pattern: '+labels[mode];
-    }
-    function setMode(m){ mode=m; dots.length=0; fliers.length=0;
-      Object.keys(segBtns).forEach(k=>segBtns[k].setAttribute('aria-pressed',String(k===m)));
-      detBtn.style.opacity = (m==='electrons')?1:0.4;
-      setModeNote(); if(REDUCED) staticFill();
-    }
-    function staticFill(){ // reduced motion: precompute pattern
-      dots.length=0; if(mode!=='waves'){ for(let i=0;i<1400;i++) addDot(); } draw();
-    }
-    setMode('electrons');
-    if(!REDUCED) Loop.start(tick); else staticFill();
-    detBtn.onclick=()=>{ if(mode!=='electrons')return; detector=!detector; detBtn.textContent='Detector: '+(detector?'on':'off'); detBtn.classList.toggle('on',detector); dots.length=0;fliers.length=0; setModeNote(); if(REDUCED) staticFill(); };
-    clearBtn.onclick=()=>{ dots.length=0; fliers.length=0; if(REDUCED) staticFill(); };
-  },
-  stop(){ Loop.stop(); if(this._onR) window.removeEventListener('resize',this._onR); }
-};
-
-/* =====================================================================
-   ROUTER
-   ===================================================================== */
-const PIECES=[PieceAtoms,PieceBasic,PieceSciences,PieceEnergy,PieceGravity,PieceQuantum];
-let current=null;
-
-function buildNav(){
-  const nav=document.getElementById('nav');
-  nav.innerHTML='';
-  PIECES.forEach((p,i)=>{
-    const a=el('a',{href:'#',text:p.roman+'. '+p.title});
-    a.onclick=(e)=>{ e.preventDefault(); go(i); };
-    nav.appendChild(a);
-    if(i<PIECES.length-1) nav.appendChild(document.createTextNode('   |   '));
-  });
+// ===================== 4. ENERGY (KE / PE / heat / total, friction) =====================
+var ex = document.getElementById("energy").getContext("2d");
+var angle = 120 * Math.PI / 180, vel = 0, k = 0.01, friction = false, heat = 0;
+var E0 = k * (1 - Math.cos(angle));
+function drawEnergy() {
+  ex.clearRect(0, 0, 400, 250);
+  vel -= k * Math.sin(angle);
+  if (friction) {
+    var before = 0.5 * vel * vel;
+    vel *= 0.999;
+    var after = 0.5 * vel * vel;
+    heat += (before - after);
+  }
+  angle += vel;
+  var pivotX = 200, pivotY = 20, len = 150;
+  var bxx = pivotX + Math.sin(angle) * len;
+  var byy = pivotY + Math.cos(angle) * len;
+  ex.strokeStyle = "black"; ex.lineWidth = 1;
+  ex.beginPath(); ex.moveTo(pivotX, pivotY); ex.lineTo(bxx, byy); ex.stroke();
+  ex.fillStyle = "red"; ex.beginPath(); ex.arc(bxx, byy, 14, 0, 7); ex.fill();
+  var ke = 0.5 * vel * vel;
+  var pe = k * (1 - Math.cos(angle));
+  var tot = ke + pe + heat;
+  var bars = [[ke, "green", "KE"], [pe, "blue", "PE"], [heat, "gray", "Ht"], [tot, "orange", "Tot"]];
+  for (var i = 0; i < bars.length; i++) {
+    var h = bars[i][0] / E0 * 200;
+    if (h > 210) { h = 210; }
+    var x = 30 + i * 35;
+    ex.fillStyle = bars[i][1];
+    ex.fillRect(x, 240 - h, 25, h);
+    ex.fillStyle = "black"; ex.font = "12px Arial"; ex.textAlign = "center";
+    ex.fillText(bars[i][2], x + 12, 248);
+  }
 }
-function go(i){
-  if(current && current.stop) current.stop();
-  const p=PIECES[i]; current=p; p.render();
-  const nav=document.getElementById('nav');
-  Array.prototype.forEach.call(nav.querySelectorAll('a'),(a,j)=>{ a.style.fontWeight=(j===i)?'bold':'normal'; });
-  window.scrollTo(0,0);
-  try{ history.replaceState(null,'','#'+(i+1)); }catch(e){}
+function setAngle() {
+  angle = Number(document.getElementById("angleSlider").value) * Math.PI / 180;
+  vel = 0; heat = 0; E0 = k * (1 - Math.cos(angle));
 }
-buildNav();
-const startIdx = Math.min(5, Math.max(0, (parseInt((location.hash||'').replace('#',''))||1)-1));
-go(startIdx);
+function releasePendulum() { setAngle(); }
+function toggleFriction() {
+  friction = !friction;
+  document.getElementById("fricBtn").innerHTML = "Friction: " + (friction ? "on" : "off");
+}
+setInterval(drawEnergy, 30);
+
+// ===================== 5. GRAVITY (launch speed, orbit type) =====================
+var gx = document.getElementById("gravity").getContext("2d");
+var sunX = 200, sunY = 125, GM = 120;
+var startX = 310, startR = startX - sunX;
+var planet = { x: startX, y: 125, dx: 0, dy: 0 };
+var trail = [];
+function launchPlanet() {
+  var factor = Number(document.getElementById("speedSlider").value) / 100;
+  var vcirc = Math.sqrt(GM / startR);
+  planet = { x: startX, y: 125, dx: 0, dy: -factor * vcirc };
+  trail = [];
+}
+function setSpeed() {
+  document.getElementById("orbitInfo");
+}
+function clearTrail() { trail = []; }
+function drawGravity() {
+  gx.clearRect(0, 0, 400, 250);
+  var dx = sunX - planet.x, dy = sunY - planet.y;
+  var dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist < 12) { dist = 12; }
+  var force = GM / (dist * dist);
+  planet.dx += force * dx / dist;
+  planet.dy += force * dy / dist;
+  planet.x += planet.dx;
+  planet.y += planet.dy;
+  trail.push({ x: planet.x, y: planet.y });
+  if (trail.length > 50) { trail.shift(); }
+  gx.fillStyle = "gray";
+  for (var i = 0; i < trail.length; i++) { gx.fillRect(trail[i].x, trail[i].y, 2, 2); }
+  gx.fillStyle = "orange"; gx.beginPath(); gx.arc(sunX, sunY, 16, 0, 7); gx.fill();
+  gx.fillStyle = "blue"; gx.beginPath(); gx.arc(planet.x, planet.y, 8, 0, 7); gx.fill();
+  // orbit type
+  var speed = Math.sqrt(planet.dx * planet.dx + planet.dy * planet.dy);
+  var vEsc = Math.sqrt(2 * GM / dist);
+  var factor = Number(document.getElementById("speedSlider").value) / 100;
+  var label;
+  if (speed > vEsc * 0.99) { label = "escape"; }
+  else if (Math.abs(factor - 1) < 0.06) { label = "circular"; }
+  else { label = "ellipse"; }
+  document.getElementById("orbitInfo").innerHTML = "Orbit: " + label;
+}
+launchPlanet();
+setInterval(drawGravity, 30);
+
+// ===================== 6. QUANTUM (full model, plain colors) =====================
+var qx = document.getElementById("quantum").getContext("2d");
+var mode = "electron";
+var detector = false;
+var dots = [];     // landed: {x,y}
+var fliers = [];   // travelling particles
+var qt = 0, fireAccum = 0;
+var SRCX = 30, BARX = 150, SCREENX = 290, MIDY = 125;
+var SEP = 30, SLITH = 12, SPAN = 95;
+
+function lerpQ(a, b, t) { return a + (b - a) * t; }
+function intensity(yy) {
+  var k = 0.16, d = SEP, a = SLITH;
+  var beta = k * a * yy / 120;
+  var env = Math.abs(beta) < 0.0001 ? 1 : Math.pow(Math.sin(beta) / beta, 2);
+  var inter = Math.pow(Math.cos(k * d * yy / 40), 2);
+  return env * inter;
+}
+function sampleWaveY() {
+  for (var t = 0; t < 60; t++) {
+    var yy = (Math.random() * 2 - 1) * SPAN;
+    if (Math.random() < intensity(yy)) { return MIDY + yy; }
+  }
+  return MIDY;
+}
+function sampleBulletY() {
+  var side = Math.random() < 0.5 ? -1 : 1;
+  var g = 0; for (var i = 0; i < 6; i++) { g += Math.random(); } g = (g / 6 - 0.5);
+  return MIDY + side * SEP + g * 40;
+}
+function targetY() {
+  if (mode == "bullet" || (mode == "electron" && detector)) { return sampleBulletY(); }
+  return sampleWaveY();
+}
+function spawnFlier() { fliers.push({ t: 0, ty: targetY(), tx: SCREENX + Math.random() * 60 }); }
+
+function updateQuantum() {
+  qt++;
+  if (mode != "wave") {
+    fireAccum++;
+    if (fireAccum >= 3) { fireAccum = 0; spawnFlier(); }
+    for (var i = fliers.length - 1; i >= 0; i--) {
+      var f = fliers[i];
+      f.t += 0.03;
+      if (f.t >= 1) {
+        dots.push({ x: f.tx, y: f.ty });
+        if (dots.length > 2500) { dots.shift(); }
+        fliers.splice(i, 1);
+      }
+    }
+  }
+  drawQuantum();
+}
+
+function drawQuantum() {
+  qx.clearRect(0, 0, 400, 250);
+  // source
+  qx.fillStyle = "red"; qx.beginPath(); qx.arc(SRCX, MIDY, 7, 0, 7); qx.fill();
+  // barrier with two slits
+  qx.fillStyle = "black";
+  qx.fillRect(BARX, 0, 8, MIDY - SEP - SLITH);
+  qx.fillRect(BARX, MIDY - SEP + SLITH, 8, (MIDY + SEP - SLITH) - (MIDY - SEP + SLITH));
+  qx.fillRect(BARX, MIDY + SEP + SLITH, 8, 250 - (MIDY + SEP + SLITH));
+  // detector marks
+  if (detector && mode == "electron") {
+    qx.fillStyle = "red";
+    qx.beginPath(); qx.arc(BARX + 4, MIDY - SEP, 5, 0, 7); qx.fill();
+    qx.beginPath(); qx.arc(BARX + 4, MIDY + SEP, 5, 0, 7); qx.fill();
+  }
+  // screen line
+  qx.strokeStyle = "#999"; qx.lineWidth = 1;
+  qx.beginPath(); qx.moveTo(SCREENX, MIDY - SPAN); qx.lineTo(SCREENX, MIDY + SPAN); qx.stroke();
+
+  if (mode == "wave") {
+    // moving wavefronts: from the source, then from each slit
+    qx.strokeStyle = "#ccc"; qx.lineWidth = 1;
+    var p1 = (qt * 1.2) % 40;
+    for (var r = p1; r < BARX - SRCX; r += 40) { qx.beginPath(); qx.arc(SRCX, MIDY, r, -1, 1); qx.stroke(); }
+    var p2 = (qt * 1.2) % 34;
+    var slits = [-SEP, SEP];
+    for (var sIdx = 0; sIdx < slits.length; sIdx++) {
+      for (var r2 = p2; r2 < SCREENX - BARX; r2 += 34) {
+        qx.beginPath(); qx.arc(BARX, MIDY + slits[sIdx], r2, -1.2, 1.2); qx.stroke();
+      }
+    }
+    // analytic intensity curve
+    qx.strokeStyle = "black"; qx.lineWidth = 2; qx.beginPath();
+    for (var yy = -SPAN; yy <= SPAN; yy += 2) {
+      var cx = SCREENX + intensity(yy) * 66;
+      if (yy == -SPAN) { qx.moveTo(cx, MIDY + yy); } else { qx.lineTo(cx, MIDY + yy); }
+    }
+    qx.stroke();
+  } else {
+    // histogram of landed dots
+    var bins = 90, arr = [];
+    for (var b = 0; b < bins; b++) { arr[b] = 0; }
+    for (var i = 0; i < dots.length; i++) {
+      var bb = Math.floor((dots[i].y - (MIDY - SPAN)) / (2 * SPAN) * bins);
+      if (bb >= 0 && bb < bins) { arr[bb]++; }
+    }
+    var mx = 1; for (var b = 0; b < bins; b++) { if (arr[b] > mx) { mx = arr[b]; } }
+    qx.fillStyle = "#ddd";
+    for (var b = 0; b < bins; b++) {
+      var yb = MIDY - SPAN + b * (2 * SPAN / bins);
+      qx.fillRect(SCREENX, yb, arr[b] / mx * 66, (2 * SPAN / bins) + 0.6);
+    }
+    // landed dots
+    qx.fillStyle = "black";
+    for (var i = 0; i < dots.length; i++) { qx.fillRect(dots[i].x, dots[i].y, 2, 2); }
+    // travelling particles
+    for (var i = 0; i < fliers.length; i++) {
+      var f = fliers[i];
+      var slitY = MIDY + (f.ty < MIDY ? -SEP : SEP), x, y, u;
+      if (f.t < 0.5) { u = f.t / 0.5; x = lerpQ(SRCX, BARX, u); y = lerpQ(MIDY, slitY, u); }
+      else { u = (f.t - 0.5) / 0.5; x = lerpQ(BARX, f.tx, u); y = lerpQ(slitY, f.ty, u); }
+      qx.fillStyle = (mode == "bullet") ? "gray" : "black";
+      qx.beginPath(); qx.arc(x, y, 3, 0, 7); qx.fill();
+    }
+  }
+  // readout
+  var names = { electron: "electrons", bullet: "bullets", wave: "waves" };
+  var info = "Mode: " + names[mode];
+  if (mode != "wave") { info += ". Hits: " + dots.length; }
+  if (mode == "electron") { info += ". Detector: " + (detector ? "on" : "off"); }
+  document.getElementById("quantumInfo").innerHTML = info;
+}
+
+function setMode(m) { mode = m; dots = []; fliers = []; drawQuantum(); }
+function toggleDetector() {
+  detector = !detector;
+  document.getElementById("detBtn").innerHTML = "Detector: " + (detector ? "on" : "off");
+  dots = []; fliers = []; drawQuantum();
+}
+function clearGun() { dots = []; fliers = []; drawQuantum(); }
+setInterval(updateQuantum, 30);
+drawQuantum();
 </script>
+
 </body>
 </html>
