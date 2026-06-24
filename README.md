@@ -58,6 +58,11 @@ button.on{font-weight:bold}
 
 <script>
 "use strict";
+/* =====================================================================
+   SIX EASY PIECES, INTERACTIVE
+   Each piece is a self-contained module: {meta, render(stage), stop()}.
+   The router mounts one at a time and stops the previous animation loop.
+   ===================================================================== */
 
 const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -378,84 +383,56 @@ const PieceBasic = {
    in Feynman's telling, it ultimately rests on physics.
    ===================================================================== */
 const PieceSciences = {
-  color:'var(--c3)', roman:'III', eyebrow:'Piece Three',
-  title:'The Relation of Physics to Other Sciences',
-  lead:'Every science rests on physics. <span class="em">Tap a field</span> to see how.',
-  nodes:[
-    {name:'Chemistry', tag:'Atoms, arranged',
-     text:'Atoms rearranging partners: chemistry is physics for many atoms at once.'},
-    {name:'Biology', tag:'Chemistry, alive',
-     text:'The same atoms and forces, arranged into chemistry that lives.'},
-    {name:'Astronomy', tag:'Physics, enlarged',
-     text:'The stars are made of the same atoms we study on Earth.'},
-    {name:'Geology', tag:'Forces on a planet',
-     text:'Mountains, volcanoes, drifting continents: heat and force on a planet.'},
-    {name:'Psychology', tag:'The hardest frontier',
-     text:'Even thought may trace down to the physics of the brain. We are far from it.'}
-  ],
+  color:'var(--c3)', roman:'III', title:'The Relation of Physics to Other Sciences',
+  names:['Chemistry','Biology','Astronomy','Geology','Psychology'],
   render(){
     const stage=pieceHeader(this);
     const panel=el('div',{class:'panel'});
     const wrap=el('div',{class:'sim-wrap'});
     const canvas=el('canvas',{class:'sim-canvas'});
-    wrap.appendChild(canvas);
-    const side=el('div',{class:'sidepanel'});
-    const sTag=el('div',{class:'tag'}),sTitle=el('h3'),sText=el('p');
-    const sClose=el('button',{class:'action',text:'Close',style:'margin-top:8px'});
-    side.appendChild(sTag);side.appendChild(sTitle);side.appendChild(sText);side.appendChild(sClose);
-    wrap.appendChild(side);
-    panel.appendChild(wrap);
-    stage.appendChild(panel);
-    stage.appendChild(el('div',{class:'notebox',html:'Physics sits underneath the rest: they are layers of the same structure.'}));
+    wrap.appendChild(canvas); panel.appendChild(wrap); stage.appendChild(panel);
 
-    let W=0,H=0,t=0,sel=-1,hover=-1;
-    const nodes=this.nodes; const pos=nodes.map((_,i)=>({a:i/nodes.length*Math.PI*2,r:0,x:0,y:0}));
-    const size=()=>{const m=fitCanvas(canvas,Math.min(500,Math.max(360,canvas.clientWidth*0.6)));W=m.w;H=m.h;};
-    size(); const onR=()=>size(); window.addEventListener('resize',onR); this._onR=onR;
-
+    const names=this.names;
+    let W=0,H=0;
+    const pos=names.map(()=>({x:0,y:0}));
+    const lit=names.map(()=>false);
+    const size=()=>{const m=fitCanvas(canvas,Math.min(460,Math.max(330,canvas.clientWidth*0.6)));W=m.w;H=m.h;layout();draw();};
     function layout(){
-      const cx=W/2,cy=H/2,R=Math.min(W,H)*0.33;
-      pos.forEach((p,i)=>{const a=p.a + (REDUCED?0:t*0.0016);p.x=cx+Math.cos(a)*R;p.y=cy+Math.sin(a)*R*0.82;});
-      return {cx,cy};
+      const cx=W/2,cy=H/2,R=Math.min(W,H)*0.34;
+      // start at top, go clockwise
+      names.forEach((_,i)=>{const a=-Math.PI/2 + i/names.length*Math.PI*2;
+        pos[i].x=cx+Math.cos(a)*R; pos[i].y=cy+Math.sin(a)*R*0.86;});
     }
-    function frame(){
-      t++; const ctx=canvas.getContext('2d');ctx.clearRect(0,0,W,H);
-      const {cx,cy}=layout();
-      // links
-      pos.forEach((p,i)=>{
-        const active=(i===sel||i===hover);
-        ctx.strokeStyle=active?'rgba(79,211,138,.85)':'rgba(79,211,138,.22)';
-        ctx.lineWidth=active?2.4:1.2;
-        ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(p.x,p.y);ctx.stroke();
-        if(active){ // travelling pulse
-          const tt=(t%70)/70;const mx=lerp(cx,p.x,tt),my=lerp(cy,p.y,tt);
-          ctx.beginPath();ctx.arc(mx,my,3.5,0,7);ctx.fillStyle='#9bf3c4';ctx.fill();
-        }
+    function draw(){
+      const ctx=canvas.getContext('2d');ctx.clearRect(0,0,W,H);
+      const cx=W/2,cy=H/2;
+      // spokes
+      names.forEach((_,i)=>{
+        ctx.strokeStyle=lit[i]?'#4fd38a':'rgba(79,211,138,.22)';
+        ctx.lineWidth=lit[i]?3:1.2;
+        ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(pos[i].x,pos[i].y);ctx.stroke();
       });
       // hub
-      ctx.beginPath();ctx.arc(cx,cy,30,0,7);
-      ctx.fillStyle='#4fd38a';ctx.fill();
-      ctx.fillStyle='#06351f';ctx.font='700 13px Space Grotesk';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.beginPath();ctx.arc(cx,cy,32,0,7);ctx.fillStyle='#4fd38a';ctx.fill();
+      ctx.fillStyle='#06351f';ctx.font='bold 14px Georgia,serif';ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.fillText('PHYSICS',cx,cy);
       // nodes
-      pos.forEach((p,i)=>{
-        const active=(i===sel||i===hover);const rad=active?24:20;
-        ctx.beginPath();ctx.arc(p.x,p.y,rad,0,7);
-        ctx.fillStyle=active?'#4fd38a':'rgba(79,211,138,.16)';
-        ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#4fd38a';ctx.stroke();
-        ctx.fillStyle=active?'#06351f':'#d6f5e4';ctx.font='600 12px Space Grotesk';
-        ctx.fillText(nodes[i].name,p.x,p.y+(active?0:0));
+      names.forEach((nm,i)=>{
+        ctx.beginPath();ctx.arc(pos[i].x,pos[i].y,26,0,7);
+        ctx.fillStyle=lit[i]?'#4fd38a':'#0b0b0b';ctx.fill();
+        ctx.lineWidth=2;ctx.strokeStyle='#4fd38a';ctx.stroke();
+        ctx.fillStyle=lit[i]?'#06351f':'#d6f5e4';ctx.font='13px Georgia,serif';
+        ctx.fillText(nm,pos[i].x,pos[i].y);
       });
     }
-    if(!REDUCED) Loop.start(frame); else frame();
+    size(); const onR=()=>size(); window.addEventListener('resize',onR); this._onR=onR;
 
-    function pick(mx,my){ for(let i=0;i<pos.length;i++){ if(Math.hypot(pos[i].x-mx,pos[i].y-my)<26) return i; } return -1; }
-    function evtPos(e){const r=canvas.getBoundingClientRect();const cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;const cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;return [cx,cy];}
+    function evtPos(e){const r=canvas.getBoundingClientRect();
+      const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+      const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;return [x,y];}
+    function hit(mx,my){for(let i=0;i<pos.length;i++){if(Math.hypot(pos[i].x-mx,pos[i].y-my)<30)return i;}return -1;}
     canvas.style.cursor='pointer';
-    canvas.onmousemove=(e)=>{const[mx,my]=evtPos(e);hover=pick(mx,my);canvas.style.cursor=hover>=0?'pointer':'default';if(REDUCED)frame();};
-    function open(i){ if(i<0)return; sel=i; const n=nodes[i];sTag.textContent=n.tag;sTitle.textContent=n.name;sText.textContent=n.text;side.classList.add('show'); if(REDUCED)frame(); }
-    canvas.onclick=(e)=>{const[mx,my]=evtPos(e);open(pick(mx,my));};
-    sClose.onclick=()=>{side.classList.remove('show');sel=-1;if(REDUCED)frame();};
+    canvas.onclick=(e)=>{const[mx,my]=evtPos(e);const i=hit(mx,my);if(i>=0){lit[i]=!lit[i];draw();}};
   },
   stop(){ Loop.stop(); if(this._onR) window.removeEventListener('resize',this._onR); }
 };
